@@ -1,0 +1,38 @@
+import React from 'react';
+
+interface BullLogoProps extends React.SVGProps<SVGSVGElement> {
+  className?: string;
+  size?: number | string;
+}
+
+export const BullLogo: React.FC<BullLogoProps> = ({
+  className = 'w-6 h-6',
+  size,
+  ...props
+}) => {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={size ? { width: size, height: size } : undefined}
+      aria-hidden="true"
+      {...props}
+    >
+      {/* 
+        Simplified geometric Bull head:
+        - Sweeping aggressive horns
+        - Sleek ears
+        - Angular combat facial structure & nose
+      */}
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M 2.2 2.5 C 4 6.2 6.5 8.2 8.2 9.2 C 6.5 9.4 4.5 9.8 2.8 11.2 C 4.2 12.4 6.2 12.2 8 11.6 C 8.3 14.2 9.5 17.5 10.5 19.8 C 11 20.8 11.4 21.5 12 21.5 C 12.6 21.5 13 20.8 13.5 19.8 C 14.5 17.5 15.7 14.2 16 11.6 C 17.8 12.2 19.8 12.4 21.2 11.2 C 19.5 9.8 17.5 9.4 15.8 9.2 C 17.5 8.2 20 6.2 21.8 2.5 C 19.2 4.2 16.5 6.2 14.2 6.8 C 13.4 6.5 12.7 6.4 12 6.4 C 11.3 6.4 10.6 6.5 9.8 6.8 C 7.5 6.2 4.8 4.2 2.2 2.5 Z M 10.2 12.2 L 12 9.5 L 13.8 12.2 L 12 15.2 L 10.2 12.2 Z M 10.5 17.5 C 10.5 16.8 11.2 16.5 12 16.5 C 12.8 16.5 13.5 16.8 13.5 17.5 C 13.5 18.2 12.8 18.8 12 18.8 C 11.2 18.8 10.5 18.2 10.5 17.5 Z"
+      />
+    </svg>
+  );
+};
+
+export default BullLogo;
