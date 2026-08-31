@@ -80,34 +80,42 @@ export const Footer: React.FC<FooterProps> = ({ settings, disciplines }) => {
             </div>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <a href="#disciplinas" className="hover:text-white transition-colors">
+                <Link href="/#disciplinas" className="hover:text-white transition-colors">
                   Disciplinas
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#campeon" className="hover:text-white transition-colors">
+                <Link href="/#campeon" className="hover:text-white transition-colors">
                   Campeón Mundial
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#horarios" className="hover:text-white transition-colors">
+                <Link href="/#horarios" className="hover:text-white transition-colors">
                   Horarios
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#nosotros" className="hover:text-white transition-colors">
+                <Link href="/#nosotros" className="hover:text-white transition-colors">
                   Quiénes Somos
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#profesores" className="hover:text-white transition-colors">
+                <Link href="/#profesores" className="hover:text-white transition-colors">
                   Profesores
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#ubicacion" className="hover:text-white transition-colors">
+                <Link href="/#ubicacion" className="hover:text-white transition-colors">
                   Ubicación & Mapa
-                </a>
+                </Link>
+              </li>
+              <li>
+                <Link href="/tienda" className="text-amber-400 hover:text-amber-300 font-medium transition-colors flex items-center gap-1.5">
+                  <span>Tienda Oficial</span>
+                  <span className="text-[9px] bg-amber-500/20 border border-amber-500/30 px-1 py-0.2 rounded font-bold uppercase">
+                    Pronto
+                  </span>
+                </Link>
               </li>
             </ul>
           </div>
@@ -120,9 +128,9 @@ export const Footer: React.FC<FooterProps> = ({ settings, disciplines }) => {
             <ul className="space-y-2.5 text-sm">
               {disciplines.map((disc) => (
                 <li key={disc.id}>
-                  <a href="#disciplinas" className="hover:text-white transition-colors">
+                  <Link href="/#disciplinas" className="hover:text-white transition-colors">
                     {disc.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

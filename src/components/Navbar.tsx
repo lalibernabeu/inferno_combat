@@ -29,12 +29,13 @@ export const Navbar: React.FC<NavbarProps> = ({ settings }) => {
   }, []);
 
   const navLinks = [
-    { label: 'Disciplinas', href: '#disciplinas' },
-    { label: 'Campeón Mundial', href: '#campeon' },
-    { label: 'Horarios', href: '#horarios' },
-    { label: 'Nosotros', href: '#nosotros' },
-    { label: 'Profesores', href: '#profesores' },
-    { label: 'Ubicación', href: '#ubicacion' },
+    { label: 'Disciplinas', href: '/#disciplinas' },
+    { label: 'Campeón', href: '/#campeon' },
+    { label: 'Horarios', href: '/#horarios' },
+    { label: 'Nosotros', href: '/#nosotros' },
+    { label: 'Profesores', href: '/#profesores' },
+    { label: 'Ubicación', href: '/#ubicacion' },
+    { label: 'Tienda', href: '/tienda', isBadge: true },
   ];
 
   const whatsAppUrl = getWhatsAppUrl();
@@ -65,15 +66,24 @@ export const Navbar: React.FC<NavbarProps> = ({ settings }) => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-7">
+          <nav className="hidden lg:flex items-center gap-6">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
-                className="text-sm font-medium text-combat-slate-300 hover:text-white transition-colors relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-combat-red hover:after:w-full after:transition-all after:duration-300"
+                className={`text-sm font-medium transition-colors relative py-1 flex items-center gap-1.5 ${
+                  link.isBadge
+                    ? 'text-amber-400 hover:text-amber-300 font-semibold'
+                    : 'text-combat-slate-300 hover:text-white after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-combat-red hover:after:w-full after:transition-all after:duration-300'
+                }`}
               >
-                {link.label}
-              </a>
+                <span>{link.label}</span>
+                {link.isBadge && (
+                  <span className="text-[9px] font-bold px-1.5 py-0.2 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded uppercase tracking-wider">
+                    Nuevo
+                  </span>
+                )}
+              </Link>
             ))}
           </nav>
 
@@ -106,14 +116,19 @@ export const Navbar: React.FC<NavbarProps> = ({ settings }) => {
         <div className="lg:hidden bg-surface/98 backdrop-blur-xl border-b border-surface-border px-4 pt-3 pb-6 space-y-3 animate-in fade-in slide-in-from-top-4 duration-200 shadow-2xl">
           <div className="flex flex-col space-y-2">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className="px-4 py-3 rounded-lg text-base font-medium text-combat-slate-200 hover:text-white hover:bg-surface-hover transition-colors"
+                className="px-4 py-3 rounded-lg text-base font-medium text-combat-slate-200 hover:text-white hover:bg-surface-hover transition-colors flex items-center justify-between"
               >
-                {link.label}
-              </a>
+                <span>{link.label}</span>
+                {link.isBadge && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded uppercase">
+                    Próximamente
+                  </span>
+                )}
+              </Link>
             ))}
           </div>
           <div className="pt-2">
