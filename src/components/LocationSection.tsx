@@ -21,7 +21,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({ settings }) =>
             Dónde <span className="text-gradient-red">Encontrarnos</span>
           </h2>
           <p className="mt-4 text-base sm:text-lg text-combat-slate-300">
-            Ubicación estratégica y de fácil acceso en Buenos Aires, con múltiples opciones de transporte público.
+            Ubicación estratégica y de fácil acceso en Mendoza, con múltiples opciones de transporte público.
           </p>
         </div>
 
@@ -59,11 +59,8 @@ export const LocationSection: React.FC<LocationSectionProps> = ({ settings }) =>
                   <p className="text-sm font-semibold text-white mt-1">
                     Lunes a Viernes: 08:00 a 22:30 hs
                   </p>
-                  <p className="text-sm font-semibold text-combat-slate-300">
-                    Sábados: 10:00 a 16:00 hs
-                  </p>
                   <p className="text-xs text-combat-slate-400 mt-1">
-                    Domingos: Cerrado
+                    Sabados y Domingos: Cerrado
                   </p>
                 </div>
               </div>
@@ -104,7 +101,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({ settings }) =>
               allowFullScreen={false}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="Ubicación de APEX Combat Club"
+              title={`Ubicación de ${settings.name || 'INFERNO COMBAT'}`}
               className="w-full h-full grayscale contrast-125 opacity-90 hover:grayscale-0 transition-all duration-300"
             />
           </div>

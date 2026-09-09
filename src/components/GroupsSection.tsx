@@ -49,19 +49,17 @@ export const GroupsSection: React.FC<GroupsSectionProps> = ({ groups }) => {
             return (
               <div
                 key={group.id}
-                className={`rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${
-                  isCompetition
+                className={`rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${isCompetition
                     ? 'bg-gradient-to-b from-surface-card to-combat-red/10 border border-combat-red/40 shadow-lg shadow-combat-red/10'
                     : 'bg-surface-card border border-surface-border hover:border-surface-hover'
-                }`}
+                  }`}
               >
                 <div>
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${
-                      isCompetition
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${isCompetition
                         ? 'bg-combat-red text-white'
                         : 'bg-surface-light border border-surface-border text-combat-gold'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-6 h-6" />
                   </div>
@@ -73,10 +71,10 @@ export const GroupsSection: React.FC<GroupsSectionProps> = ({ groups }) => {
                   {/* Age & Level Badges */}
                   <div className="flex flex-col gap-1.5 mb-4">
                     <span className="inline-block text-xs font-bold text-combat-slate-300 bg-surface-light px-2.5 py-1 rounded-md border border-surface-border/50">
-                      🎂 <span className="text-white">{group.age_range}</span>
+                      <span className="text-white">{group.age_range}</span>
                     </span>
                     <span className="inline-block text-xs font-bold text-combat-gold bg-combat-gold/10 px-2.5 py-1 rounded-md border border-combat-gold/20">
-                      ⚡ Nivel: {group.level}
+                      Nivel: {group.level}
                     </span>
                   </div>
 

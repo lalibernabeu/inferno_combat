@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Outfit } from 'next/font/google';
 import '../styles/globals.css';
-import { getGymSettings } from '@/lib/mock-data';
+import { getGymSettings } from '@/lib/data';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -15,32 +15,37 @@ const outfit = Outfit({
   display: 'swap',
 });
 
-const settings = getGymSettings();
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getGymSettings();
+  const title = settings.seo_title || `${settings.name || 'INFERNO COMBAT'} | Kickboxing, Boxeo, K1 y Muay Thai`;
+  const description = settings.seo_description || 'Centro de entrenamiento de deportes de combate y artes marciales en Mendoza.';
 
-export const metadata: Metadata = {
-  title: settings.seo_title,
-  description: settings.seo_description,
-  keywords: [
-    'Kickboxing',
-    'Boxeo',
-    'BJJ',
-    'Brazilian Jiu Jitsu',
-    'Muay Thai',
-    'MMA',
-    'Gimnasio de Combate',
-    'Artes Marciales',
-    'Defensa Personal',
-    'Buenos Aires',
-  ],
-  authors: [{ name: settings.name }],
-  openGraph: {
-    title: settings.seo_title,
-    description: settings.seo_description,
-    siteName: settings.name,
-    locale: 'es_AR',
-    type: 'website',
-  },
-};
+  return {
+    title,
+    description,
+    keywords: [
+      settings.name || 'INFERNO COMBAT',
+      'Inferno Combat',
+      'Kickboxing',
+      'Boxeo',
+      'K1',
+      'K-1',
+      'Muay Thai',
+      'Gimnasio de Combate',
+      'Artes Marciales',
+      'Defensa Personal',
+      'Mendoza',
+    ],
+    authors: [{ name: settings.name || 'INFERNO COMBAT' }],
+    openGraph: {
+      title,
+      description,
+      siteName: settings.name || 'INFERNO COMBAT',
+      locale: 'es_AR',
+      type: 'website',
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: '#090D16',

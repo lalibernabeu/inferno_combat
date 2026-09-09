@@ -12,29 +12,29 @@ import {
 
 export const mockGymSettings: GymSettings = {
   id: 'settings-singleton-01',
-  name: 'APEX COMBAT CLUB',
+  name: 'INFERNO COMBAT',
   slogan: 'Forja tu carácter. Domina el combate.',
   short_description:
-    'Centro de alto rendimiento en deportes de combate y artes marciales. Entrenamiento integral para todos los niveles: desde recreativo y defensa personal hasta competición profesional.',
+    'Centro de alto rendimiento en deportes de combate y artes marciales. Entrenamiento integral para todos los niveles: desde recreativo y defensa personal hasta competición.',
   about_text:
-    'En APEX COMBAT CLUB combinamos la disciplina tradicional de las artes marciales con la metodología más avanzada de preparación física de combate. Nuestro gimnasio está equipado con ring reglamentario, jaula de MMA, tatami olímpico de alta absorción de impacto y zona de sacos pesados. Contamos con un cuerpo docente de atletas de élite liderado por un Campeón Mundial, asegurando una enseñanza técnica, segura y basada en valores de respeto, constancia y superación personal.',
-  address: 'Av. Corrientes 4520, Almagro',
-  city: 'Ciudad Autónoma de Buenos Aires',
-  phone: '+54 9 11 5555-8899',
-  whatsapp_number: '5491155558899',
+    'En INFERNO COMBAT combinamos la disciplina del entrenamiento de combate con la metodología más avanzada de preparación física. Nuestro gimnasio está equipado con tatami antibacteriano de alta absorción de impacto y zona de sacos de impacto y peso libre. Asegurando una enseñanza técnica, segura y basada en valores de respeto, constancia y superación personal.',
+  address: 'Av. San Martín 1234',
+  city: 'Mendoza',
+  phone: '+54 9 261 555-8899',
+  whatsapp_number: '5492615558899',
   whatsapp_message:
-    '¡Hola! Quisiera consultar por las clases de combate y reservar una clase de prueba gratuita.',
-  instagram_url: 'https://instagram.com/apexcombatclub',
-  facebook_url: 'https://facebook.com/apexcombatclub',
+    '¡Hola! Quisiera consultar por las clases de combate en INFERNO COMBAT.',
+  instagram_url: 'https://instagram.com/infernocombat',
+  facebook_url: 'https://facebook.com/infernocombat',
   google_maps_embed_url:
-    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3283.9926685002597!2d-58.428751523471015!3d-34.60434865753177!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bcca62d4715555%3A0x6739956488730b65!2sAv.%20Corrientes%204520%2C%20C1195AAS%20Cdad.%20Aut%C3%B3noma%20de%20Buenos%20Aires!5e0!3m2!1ses!2sar!4v1700000000000!5m2!1ses!2sar',
-  google_maps_link: 'https://maps.google.com/?q=Av.+Corrientes+4520,+Buenos+Aires',
+    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3350.2!2d-68.8!3d-32.8!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzLCsDQ4JzAwLjAiUyA2OMKwNDgnMDAuMCJX!5e0!3m2!1ses!2sar!4v1700000000000!5m2!1ses!2sar',
+  google_maps_link: 'https://maps.google.com/?q=Mendoza,+Argentina',
   logo_url: '/images/logo.png',
   hero_bg_url:
     'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&w=2000&q=80',
-  seo_title: 'APEX Combat Club | Kickboxing, Boxeo, BJJ, Muay Thai y MMA',
+  seo_title: 'INFERNO COMBAT | Kickboxing, Boxeo, K1 y Muay Thai',
   seo_description:
-    'Gimnasio de deportes de combate en Buenos Aires. Clases de Kickboxing, Boxeo, BJJ, Muay Thai y MMA con profesores de élite y Campeón Mundial.',
+    'Gimnasio de deportes de combate en Mendoza. Clases de Kickboxing, Boxeo, K1 y Muay Thai con profesores experimentados.',
 };
 
 export const mockTeachers: Teacher[] = [
@@ -227,7 +227,7 @@ export const mockGroups: Group[] = [
   },
   {
     id: 'group-04',
-    name: 'Equipo de Competición (Team APEX)',
+    name: 'Equipo de Competición (Team INFERNO)',
     description:
       'Entrenamiento de élite para deportistas federados y competidores amateurs y profesionales con planificación deportiva integral.',
     age_range: 'Con evaluación previa',

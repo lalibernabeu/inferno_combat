@@ -14,7 +14,7 @@ export const ChampionBanner: React.FC<ChampionBannerProps> = ({ champion }) => {
   if (!champion) return null;
 
   const whatsAppUrl = getWhatsAppUrl(
-    `¡Hola! Me gustaría consultar por los entrenamientos y clases dictadas por el profesor Marcos Silva.`
+    `¡Hola! Me gustaría consultar por los entrenamientos y clases dictadas por el profesor Esteban Diaz.`
   );
 
   return (
@@ -44,7 +44,7 @@ export const ChampionBanner: React.FC<ChampionBannerProps> = ({ champion }) => {
                     sizes="(max-width: 768px) 100vw, 400px"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-80" />
-                  
+
                   {/* Floating badge over photo */}
                   <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-surface/90 backdrop-blur-md border border-combat-gold/30 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-combat-gold/20 flex items-center justify-center shrink-0">
@@ -91,7 +91,7 @@ export const ChampionBanner: React.FC<ChampionBannerProps> = ({ champion }) => {
                     <Trophy className="w-6 h-6 text-combat-gold shrink-0 mt-0.5" />
                     <div>
                       <div className="text-sm font-bold text-white uppercase tracking-wide">
-                        Palmarés Internacional
+                        TÍTULOS
                       </div>
                       <p className="text-sm text-combat-slate-200 mt-0.5 font-medium">
                         {champion.champion_title_details}
@@ -140,7 +140,7 @@ export const ChampionBanner: React.FC<ChampionBannerProps> = ({ champion }) => {
                   href="#horarios"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-surface-light hover:bg-surface-hover text-white text-sm font-semibold border border-surface-border transition-colors"
                 >
-                  <span>Ver Horarios de Marcos</span>
+                  <span>Ver Horarios de Esteban</span>
                 </a>
               </div>
             </div>

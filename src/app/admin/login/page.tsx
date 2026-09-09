@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
 
     try {
       const supabase = createClient();
-      
+
       // 1. Iniciar sesión con Supabase Auth
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -56,8 +56,8 @@ export default function AdminLoginPage() {
       });
 
       if (authError || !data.user) {
-        setError(authError?.message === 'Invalid login credentials' 
-          ? 'Correo o contraseña incorrectos. Verifica tus datos en Supabase Authentication.' 
+        setError(authError?.message === 'Invalid login credentials'
+          ? 'Correo o contraseña incorrectos. Verifica tus datos en Supabase Authentication.'
           : `Error al iniciar sesión: ${authError?.message || 'Usuario no encontrado'}`);
         setLoading(false);
         return;
@@ -149,7 +149,7 @@ export default function AdminLoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="admin@apexcombat.com"
+                  placeholder="admin@infernocombat.com"
                   className="w-full pl-11 pr-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white placeholder-combat-slate-500 focus:outline-none focus:border-combat-red text-sm transition-colors"
                 />
               </div>

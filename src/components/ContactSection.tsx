@@ -26,9 +26,9 @@ const FAQS = [
       'La mayoría de las clases son mixtas y con un clima de mucho respeto y compañerismo. También disponemos de turnos infantiles especiales para niños de 6 a 12 años.',
   },
   {
-    question: '¿El gimnasio cuenta con vestuarios y duchas?',
+    question: '¿El gimnasio cuenta con vestuarios?',
     answer:
-      'Sí, disponemos de amplios vestuarios masculinos y femeninos totalmente equipados con lockers de seguridad, cambiadores y duchas con agua caliente.',
+      'Sí, disponemos de amplios vestuarios masculinos y femeninos totalmente equipados.',
   },
 ];
 

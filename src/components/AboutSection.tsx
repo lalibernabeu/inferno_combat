@@ -26,13 +26,13 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ settings }) => {
       icon: Users,
       title: 'Comunidad & Respeto',
       description:
-        'Un ambiente fraterno donde todos nos ayudamos a mejorar. Los valores marciales de humildad, compañerismo y constancia son nuestra base.',
+        'Un ambiente fraterno donde todos nos ayudamos a mejorar. Los valores  de humildad, compañerismo y constancia son nuestra base.',
     },
     {
       icon: Flame,
       title: 'Instalaciones Profesionales',
       description:
-        'Ring de boxeo reglamentario, jaula de MMA, 150m² de tatami olímpico antibacteriano y amplia zona de sacos de impacto y peso libre.',
+        'Tatami antibacteriano y zona de sacos de impacto y peso libre.',
     },
   ];
 

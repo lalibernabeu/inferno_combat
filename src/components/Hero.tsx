@@ -11,7 +11,8 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ settings }) => {
   const whatsAppUrl = getWhatsAppUrl(
-    '¡Hola! Quiero solicitar mi primera clase de prueba gratuita en APEX Combat Club.'
+    settings.whatsapp_message ||
+      `¡Hola! Quiero solicitar mi primera clase de prueba gratuita en ${settings.name || 'INFERNO COMBAT'}.`
   );
 
   return (
@@ -49,7 +50,7 @@ export const Hero: React.FC<HeroProps> = ({ settings }) => {
 
         {/* Subtitle / Description */}
         <p className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-combat-slate-300 font-normal leading-relaxed mb-9">
-          Kickboxing, Boxeo, BJJ, Muay Thai y MMA en un entorno de alto nivel. Aprende defensa
+          Kickboxing, Boxeo, K1 y Muay Thai en un entorno de alto nivel. Aprende defensa
           personal real, mejora tu condición física extrema o prepárate para competir con los
           mejores.
         </p>

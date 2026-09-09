@@ -105,7 +105,7 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({ schedules, dis
               const currentDayName = DAYS.find((d) => d.id === selectedDay)?.name;
               const disciplineName = item.discipline?.name || 'Combate';
               const groupName = item.group?.name || 'General';
-              const teacherName = item.teacher?.name || 'Staff APEX';
+              const teacherName = item.teacher?.name || 'Staff INFERNO';
               const isChamp = Boolean(item.teacher?.is_world_champion);
 
               const slotWhatsAppUrl = getWhatsAppUrl(

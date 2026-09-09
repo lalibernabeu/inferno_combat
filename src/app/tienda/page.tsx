@@ -20,9 +20,9 @@ import { Footer } from '@/components/Footer';
 import { BullLogo } from '@/components/BullLogo';
 
 export const metadata: Metadata = {
-  title: 'Tienda Oficial | APEX Combat Club',
+  title: 'Tienda Oficial | INFERNO COMBAT',
   description:
-    'Equipamiento oficial, guantes, vendas, indumentaria de combate y accesorios técnicos en APEX Combat Club.',
+    'Equipamiento oficial, guantes, vendas, indumentaria de combate y accesorios técnicos en INFERNO COMBAT.',
 };
 
 export default async function TiendaPage() {
@@ -58,7 +58,7 @@ export default async function TiendaPage() {
       items: [
         'Rashguards de compresión transpirables',
         'Shorts técnicos de Kickboxing y Muay Thai',
-        'Remeras de entrenamiento Dry-Fit APEX',
+        'Remeras de entrenamiento Dry-Fit INFERNO',
         'Hoodies y buzos oficiales de combate',
       ],
       badge: 'Próximamente',
@@ -83,7 +83,7 @@ export default async function TiendaPage() {
         'Proteína Whey Premium',
         'Creatina Monohidrato micronizada',
         'Bebidas isotónicas y sales de hidratación',
-        'Shakers y botellas térmicas APEX',
+        'Shakers y botellas térmicas INFERNO',
       ],
       badge: 'Próximamente',
     },
