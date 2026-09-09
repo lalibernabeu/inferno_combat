@@ -20,12 +20,16 @@ export async function saveGalleryItem(prevState: any, formData: FormData) {
   }
 
   let error;
-  if (id) {
-    const res = await supabase.from('gallery').update(payload).eq('id', id);
+  let savedId = id;
+
+  if (id && !id.startsWith('gal-')) {
+    const res = await supabase.from('gallery').update(payload).eq('id', id).select('id').maybeSingle();
     error = res.error;
+    if (res.data) savedId = res.data.id;
   } else {
-    const res = await supabase.from('gallery').insert(payload);
+    const res = await supabase.from('gallery').insert(payload).select('id').maybeSingle();
     error = res.error;
+    if (res.data) savedId = res.data.id;
   }
 
   if (error) {
@@ -34,7 +38,7 @@ export async function saveGalleryItem(prevState: any, formData: FormData) {
 
   revalidatePath('/', 'layout');
   revalidatePath('/admin/gallery');
-  return { success: 'Foto de galería guardada con éxito.' };
+  return { success: 'Foto de galería guardada con éxito.', id: savedId };
 }
 
 export async function deleteGalleryItem(id: string) {

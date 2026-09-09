@@ -68,7 +68,7 @@ export async function saveTeacher(prevState: any, formData: FormData) {
 
   revalidatePath('/', 'layout');
   revalidatePath('/admin/teachers');
-  return { success: 'Profesor guardado correctamente.' };
+  return { success: 'Profesor guardado correctamente.', id: teacherId };
 }
 
 export async function deleteTeacher(id: string) {

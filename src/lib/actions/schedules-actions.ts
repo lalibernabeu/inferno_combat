@@ -24,12 +24,16 @@ export async function saveSchedule(prevState: any, formData: FormData) {
   }
 
   let error;
-  if (id) {
-    const res = await supabase.from('schedules').update(payload).eq('id', id);
+  let savedId = id;
+
+  if (id && !id.startsWith('sch-')) {
+    const res = await supabase.from('schedules').update(payload).eq('id', id).select('id').maybeSingle();
     error = res.error;
+    if (res.data) savedId = res.data.id;
   } else {
-    const res = await supabase.from('schedules').insert(payload);
+    const res = await supabase.from('schedules').insert(payload).select('id').maybeSingle();
     error = res.error;
+    if (res.data) savedId = res.data.id;
   }
 
   if (error) {
@@ -38,7 +42,7 @@ export async function saveSchedule(prevState: any, formData: FormData) {
 
   revalidatePath('/', 'layout');
   revalidatePath('/admin/schedules');
-  return { success: 'Horario guardado correctamente.' };
+  return { success: 'Horario guardado correctamente.', id: savedId };
 }
 
 export async function deleteSchedule(id: string) {

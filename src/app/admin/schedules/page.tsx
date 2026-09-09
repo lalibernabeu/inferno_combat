@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CalendarDays, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Clock, Eye, EyeOff, Save, X } from 'lucide-react';
 import { ScheduleWithDetails, Discipline, Teacher, Group } from '@/lib/types';
-import { mockSchedules, mockDisciplines, mockTeachers, mockGroups, getSchedulesWithDetails } from '@/lib/mock-data';
+import { mockDisciplines, mockTeachers, mockGroups, getSchedulesWithDetails } from '@/lib/mock-data';
 import { saveSchedule, deleteSchedule } from '@/lib/actions/schedules-actions';
+import { createClient } from '@/lib/supabase/client';
 
 const DAYS = [
   { id: 1, name: 'Lunes' },
@@ -17,11 +18,52 @@ const DAYS = [
 
 export default function AdminSchedulesPage() {
   const [schedules, setSchedules] = useState<ScheduleWithDetails[]>(getSchedulesWithDetails());
+  const [disciplines, setDisciplines] = useState<Discipline[]>(mockDisciplines);
+  const [teachers, setTeachers] = useState<Teacher[]>(mockTeachers);
+  const [groups, setGroups] = useState<Group[]>(mockGroups);
   const [selectedDay, setSelectedDay] = useState<number>(1);
   const [editingItem, setEditingItem] = useState<ScheduleWithDetails | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [status, setStatus] = useState<{ success?: string; error?: string } | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const supabase = createClient();
+        const [
+          { data: schedulesData },
+          { data: disciplinesData },
+          { data: teachersData },
+          { data: groupsData },
+        ] = await Promise.all([
+          supabase
+            .from('schedules')
+            .select('*, discipline:disciplines(*), group:groups(*), teacher:teachers(*)')
+            .order('start_time', { ascending: true }),
+          supabase.from('disciplines').select('*').order('display_order', { ascending: true }),
+          supabase.from('teachers').select('*').order('display_order', { ascending: true }),
+          supabase.from('groups').select('*').order('display_order', { ascending: true }),
+        ]);
+
+        if (disciplinesData && disciplinesData.length > 0) {
+          setDisciplines(disciplinesData as Discipline[]);
+        }
+        if (teachersData && teachersData.length > 0) {
+          setTeachers(teachersData as Teacher[]);
+        }
+        if (groupsData && groupsData.length > 0) {
+          setGroups(groupsData as Group[]);
+        }
+        if (schedulesData && schedulesData.length > 0) {
+          setSchedules(schedulesData as ScheduleWithDetails[]);
+        }
+      } catch (e) {
+        console.error('Error loading schedules data from Supabase:', e);
+      }
+    }
+    loadData();
+  }, []);
 
   const currentDaySchedules = schedules.filter((s) => s.day_of_week === selectedDay);
 
@@ -66,14 +108,14 @@ export default function AdminSchedulesPage() {
       setStatus({ error: res.error });
     } else if (res?.success) {
       setStatus({ success: res.success });
-      const updatedId = formData.get('id') as string;
+      const updatedId = (res as any)?.id || (formData.get('id') as string);
       const disciplineId = formData.get('discipline_id') as string;
       const teacherId = formData.get('teacher_id') as string;
       const groupId = formData.get('group_id') as string;
 
-      const discipline = mockDisciplines.find((d) => d.id === disciplineId) || mockDisciplines[0];
-      const teacher = mockTeachers.find((t) => t.id === teacherId) || mockTeachers[0];
-      const group = mockGroups.find((g) => g.id === groupId) || mockGroups[0];
+      const discipline = disciplines.find((d) => d.id === disciplineId) || disciplines[0];
+      const teacher = teachers.find((t) => t.id === teacherId) || teachers[0];
+      const group = groups.find((g) => g.id === groupId) || groups[0];
 
       const newItem: ScheduleWithDetails = {
         id: updatedId || `sch-${Date.now()}`,
@@ -90,7 +132,8 @@ export default function AdminSchedulesPage() {
         group,
       };
 
-      if (updatedId) {
+      const existingIndex = schedules.findIndex((s) => s.id === updatedId);
+      if (existingIndex >= 0) {
         setSchedules(schedules.map((s) => (s.id === updatedId ? newItem : s)));
       } else {
         setSchedules([...schedules, newItem]);
@@ -154,7 +197,7 @@ export default function AdminSchedulesPage() {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form key={editingItem ? editingItem.id : 'new'} onSubmit={handleSubmit} className="space-y-5">
             {editingItem && <input type="hidden" name="id" value={editingItem.id} />}
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -210,11 +253,11 @@ export default function AdminSchedulesPage() {
                 </label>
                 <select
                   name="discipline_id"
-                  defaultValue={editingItem?.discipline_id || mockDisciplines[0].id}
+                  defaultValue={editingItem?.discipline_id || (disciplines[0] ? disciplines[0].id : '')}
                   required
                   className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
                 >
-                  {mockDisciplines.map((disc) => (
+                  {disciplines.map((disc) => (
                     <option key={disc.id} value={disc.id} className="bg-surface text-white">
                       {disc.name}
                     </option>
@@ -228,13 +271,13 @@ export default function AdminSchedulesPage() {
                 </label>
                 <select
                   name="teacher_id"
-                  defaultValue={editingItem?.teacher_id || mockTeachers[0].id}
+                  defaultValue={editingItem?.teacher_id || (teachers[0] ? teachers[0].id : '')}
                   required
                   className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
                 >
-                  {mockTeachers.map((t) => (
+                  {teachers.map((t) => (
                     <option key={t.id} value={t.id} className="bg-surface text-white">
-                      {t.name} {t.is_world_champion ? '🏆' : ''}
+                      {t.name} {t.nickname ? `("${t.nickname}")` : ''} {t.is_world_champion ? '🏆' : ''}
                     </option>
                   ))}
                 </select>
@@ -246,11 +289,11 @@ export default function AdminSchedulesPage() {
                 </label>
                 <select
                   name="group_id"
-                  defaultValue={editingItem?.group_id || mockGroups[0].id}
+                  defaultValue={editingItem?.group_id || (groups[0] ? groups[0].id : '')}
                   required
                   className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
                 >
-                  {mockGroups.map((g) => (
+                  {groups.map((g) => (
                     <option key={g.id} value={g.id} className="bg-surface text-white">
                       {g.name} ({g.age_range})
                     </option>
@@ -350,12 +393,12 @@ export default function AdminSchedulesPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-bold text-white">{sch.discipline?.name}</td>
+                    <td className="px-6 py-4 font-bold text-white">{sch.discipline?.name || 'Sin disciplina'}</td>
                     <td className="px-6 py-4 text-combat-slate-200">
-                      {sch.teacher?.name} {sch.teacher?.is_world_champion ? '🏆' : ''}
+                      {sch.teacher?.name || 'Sin profesor'} {sch.teacher?.is_world_champion ? '🏆' : ''}
                     </td>
                     <td className="px-6 py-4 text-xs font-semibold text-combat-gold">
-                      {sch.group?.name}
+                      {sch.group?.name || 'General'}
                     </td>
                     <td className="px-6 py-4 text-xs text-combat-slate-400 italic">
                       {sch.notes || '-'}

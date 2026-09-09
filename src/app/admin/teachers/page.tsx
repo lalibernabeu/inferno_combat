@@ -91,7 +91,7 @@ export default function AdminTeachersPage() {
       setStatus({ error: res.error });
     } else if (res?.success) {
       setStatus({ success: res.success });
-      const updatedId = formData.get('id') as string;
+      const updatedId = (res as any)?.id || (formData.get('id') as string);
       const selectedDiscIds = formData.getAll('disciplines') as string[];
       const assignedDisciplines = disciplines.filter((d) => selectedDiscIds.includes(d.id));
 
@@ -173,7 +173,7 @@ export default function AdminTeachersPage() {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form key={editingItem ? editingItem.id : 'new'} onSubmit={handleSubmit} className="space-y-5">
             {editingItem && <input type="hidden" name="id" value={editingItem.id} />}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -365,9 +365,8 @@ export default function AdminTeachersPage() {
         {teachers.map((teacher) => (
           <div
             key={teacher.id}
-            className={`rounded-2xl bg-surface-card border p-5 flex flex-col justify-between space-y-4 shadow-xl ${
-              teacher.is_world_champion ? 'border-combat-gold/50' : 'border-surface-border'
-            }`}
+            className={`rounded-2xl bg-surface-card border p-5 flex flex-col justify-between space-y-4 shadow-xl ${teacher.is_world_champion ? 'border-combat-gold/50' : 'border-surface-border'
+              }`}
           >
             <div className="flex items-start gap-4">
               <div className="relative w-20 h-24 rounded-xl overflow-hidden bg-surface-light shrink-0 border border-surface-border">

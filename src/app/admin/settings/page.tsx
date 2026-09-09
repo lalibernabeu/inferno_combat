@@ -41,9 +41,38 @@ export default function AdminSettingsPage() {
       setStatus({ error: res.error });
     } else if (res?.success) {
       setStatus({ success: res.success });
+      setSettings((prev) => ({
+        ...prev,
+        name: (formData.get('name') as string) || prev.name,
+        slogan: (formData.get('slogan') as string) || prev.slogan,
+        short_description: (formData.get('short_description') as string) || prev.short_description,
+        about_text: (formData.get('about_text') as string) || prev.about_text,
+        address: (formData.get('address') as string) || prev.address,
+        city: (formData.get('city') as string) || prev.city,
+        phone: (formData.get('phone') as string) || prev.phone,
+        whatsapp_number: (formData.get('whatsapp_number') as string) || prev.whatsapp_number,
+        whatsapp_message: (formData.get('whatsapp_message') as string) || prev.whatsapp_message,
+        instagram_url: (formData.get('instagram_url') as string) || prev.instagram_url,
+        facebook_url: (formData.get('facebook_url') as string) || prev.facebook_url,
+        google_maps_embed_url: (formData.get('google_maps_embed_url') as string) || prev.google_maps_embed_url,
+        google_maps_link: (formData.get('google_maps_link') as string) || prev.google_maps_link,
+        hero_bg_url: (formData.get('hero_bg_url') as string) || prev.hero_bg_url,
+        seo_title: (formData.get('seo_title') as string) || prev.seo_title,
+        seo_description: (formData.get('seo_description') as string) || prev.seo_description,
+      }));
     }
     setSaving(false);
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-8 w-64 bg-surface-card rounded-xl" />
+        <div className="h-64 bg-surface-card rounded-2xl border border-surface-border" />
+        <div className="h-64 bg-surface-card rounded-2xl border border-surface-border" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -72,7 +101,7 @@ export default function AdminSettingsPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form key={settings.id || 'settings-form'} onSubmit={handleSubmit} className="space-y-8">
         <input type="hidden" name="id" value={settings.id} />
 
         {/* 1. Identidad del Gimnasio */}

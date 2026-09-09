@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { BullLogo } from '@/components/BullLogo';
 import { logout } from '@/lib/actions/auth-actions';
+import { createClient } from '@/lib/supabase/client';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -36,6 +37,20 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [gymName, setGymName] = useState('Panel Admin');
+
+  useEffect(() => {
+    async function loadBrand() {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.from('gym_settings').select('name').limit(1).maybeSingle();
+        if (data?.name) {
+          setGymName(data.name);
+        }
+      } catch {}
+    }
+    loadBrand();
+  }, []);
 
   // If we are on /admin/login, don't show the dashboard layout
   if (pathname === '/admin/login') {
@@ -61,13 +76,13 @@ export default function AdminLayout({
         <div className="p-5">
           {/* Brand */}
           <div className="flex items-center justify-between pb-6 border-b border-surface-border/60">
-            <Link href="/admin" className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-combat-red flex items-center justify-center shadow-md shadow-combat-red/30">
+            <Link href="/admin" className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-combat-red flex items-center justify-center shadow-md shadow-combat-red/30 shrink-0">
                 <BullLogo className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <span className="font-display font-black text-base text-white uppercase tracking-wider block">
-                  APEX Admin
+              <div className="min-w-0 flex-1">
+                <span className="font-display font-black text-sm text-white uppercase tracking-wider block truncate">
+                  {gymName}
                 </span>
                 <span className="text-[10px] text-combat-slate-400 font-semibold uppercase tracking-widest block">
                   Panel de Control

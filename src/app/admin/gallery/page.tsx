@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Image as ImageIcon, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Eye, EyeOff, Save, X, Maximize2 } from 'lucide-react';
 import { GalleryItem } from '@/lib/types';
 import { mockGallery } from '@/lib/mock-data';
 import { saveGalleryItem, deleteGalleryItem } from '@/lib/actions/gallery-actions';
+import { createClient } from '@/lib/supabase/client';
 
 export default function AdminGalleryPage() {
   const [gallery, setGallery] = useState<GalleryItem[]>(mockGallery);
@@ -13,6 +14,21 @@ export default function AdminGalleryPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [status, setStatus] = useState<{ success?: string; error?: string } | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    async function loadGallery() {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase.from('gallery').select('*').order('display_order', { ascending: true });
+        if (data && !error && data.length > 0) {
+          setGallery(data as GalleryItem[]);
+        }
+      } catch (e) {
+        console.error('Error loading gallery from Supabase:', e);
+      }
+    }
+    loadGallery();
+  }, []);
 
   const handleEdit = (item: GalleryItem) => {
     setEditingItem(item);
@@ -55,7 +71,7 @@ export default function AdminGalleryPage() {
       setStatus({ error: res.error });
     } else if (res?.success) {
       setStatus({ success: res.success });
-      const updatedId = formData.get('id') as string;
+      const updatedId = (res as any)?.id || (formData.get('id') as string);
       const newItem: GalleryItem = {
         id: updatedId || `gal-${Date.now()}`,
         image_url: formData.get('image_url') as string,
@@ -65,7 +81,7 @@ export default function AdminGalleryPage() {
         display_order: parseInt((formData.get('display_order') as string) || '0', 10),
       };
 
-      if (updatedId) {
+      if (updatedId && gallery.some((g) => g.id === updatedId)) {
         setGallery(gallery.map((g) => (g.id === updatedId ? newItem : g)));
       } else {
         setGallery([...gallery, newItem]);
@@ -129,7 +145,7 @@ export default function AdminGalleryPage() {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form key={editingItem ? editingItem.id : 'new'} onSubmit={handleSubmit} className="space-y-5">
             {editingItem && <input type="hidden" name="id" value={editingItem.id} />}
 
             <div>

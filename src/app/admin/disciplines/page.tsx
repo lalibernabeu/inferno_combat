@@ -150,7 +150,7 @@ export default function AdminDisciplinesPage() {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form key={editingItem ? editingItem.id : 'new'} onSubmit={handleSubmit} className="space-y-5">
             {editingItem && <input type="hidden" name="id" value={editingItem.id} />}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

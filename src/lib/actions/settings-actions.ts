@@ -64,6 +64,8 @@ export async function updateGymSettings(prevState: any, formData: FormData) {
   }
 
   revalidatePath('/', 'layout');
+  revalidatePath('/admin');
+  revalidatePath('/admin', 'layout');
   revalidatePath('/admin/settings');
   return { success: 'Configuración actualizada correctamente.' };
 }

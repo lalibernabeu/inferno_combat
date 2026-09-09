@@ -21,6 +21,9 @@ import {
   getGallery,
 } from '@/lib/data';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function AdminDashboardPage() {
   const [settings, disciplines, teachers, schedules, groups, gallery] =
     await Promise.all([

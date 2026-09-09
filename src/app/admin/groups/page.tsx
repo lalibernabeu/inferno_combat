@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layers, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Eye, EyeOff, Save, X } from 'lucide-react';
 import { Group } from '@/lib/types';
 import { mockGroups } from '@/lib/mock-data';
 import { saveGroup, deleteGroup } from '@/lib/actions/groups-actions';
+import { createClient } from '@/lib/supabase/client';
 
 export default function AdminGroupsPage() {
   const [groups, setGroups] = useState<Group[]>(mockGroups);
@@ -12,6 +13,21 @@ export default function AdminGroupsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [status, setStatus] = useState<{ success?: string; error?: string } | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    async function loadGroups() {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase.from('groups').select('*').order('display_order', { ascending: true });
+        if (data && !error && data.length > 0) {
+          setGroups(data as Group[]);
+        }
+      } catch (e) {
+        console.error('Error loading groups from Supabase:', e);
+      }
+    }
+    loadGroups();
+  }, []);
 
   const handleEdit = (g: Group) => {
     setEditingItem(g);
@@ -54,7 +70,7 @@ export default function AdminGroupsPage() {
       setStatus({ error: res.error });
     } else if (res?.success) {
       setStatus({ success: res.success });
-      const updatedId = formData.get('id') as string;
+      const updatedId = (res as any)?.id || (formData.get('id') as string);
       const newItem: Group = {
         id: updatedId || `group-${Date.now()}`,
         name: formData.get('name') as string,
@@ -65,7 +81,7 @@ export default function AdminGroupsPage() {
         display_order: parseInt((formData.get('display_order') as string) || '0', 10),
       };
 
-      if (updatedId) {
+      if (updatedId && groups.some((g) => g.id === updatedId)) {
         setGroups(groups.map((g) => (g.id === updatedId ? newItem : g)));
       } else {
         setGroups([...groups, newItem]);
@@ -129,7 +145,7 @@ export default function AdminGroupsPage() {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form key={editingItem ? editingItem.id : 'new'} onSubmit={handleSubmit} className="space-y-5">
             {editingItem && <input type="hidden" name="id" value={editingItem.id} />}
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">

@@ -24,14 +24,18 @@ export async function saveDiscipline(prevState: any, formData: FormData) {
   }
 
   let error;
-  if (id) {
+  let savedId = id;
+
+  if (id && !id.startsWith('disc-')) {
     // Update
-    const res = await supabase.from('disciplines').update(payload).eq('id', id);
+    const res = await supabase.from('disciplines').update(payload).eq('id', id).select('id').maybeSingle();
     error = res.error;
+    if (res.data) savedId = res.data.id;
   } else {
     // Insert
-    const res = await supabase.from('disciplines').insert(payload);
+    const res = await supabase.from('disciplines').insert(payload).select('id').maybeSingle();
     error = res.error;
+    if (res.data) savedId = res.data.id;
   }
 
   if (error) {
@@ -40,7 +44,7 @@ export async function saveDiscipline(prevState: any, formData: FormData) {
 
   revalidatePath('/', 'layout');
   revalidatePath('/admin/disciplines');
-  return { success: 'Disciplina guardada con éxito.' };
+  return { success: 'Disciplina guardada con éxito.', id: savedId };
 }
 
 export async function deleteDiscipline(id: string) {

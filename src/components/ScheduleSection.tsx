@@ -103,15 +103,20 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({ schedules, dis
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredSchedules.map((item) => {
               const currentDayName = DAYS.find((d) => d.id === selectedDay)?.name;
+              const disciplineName = item.discipline?.name || 'Combate';
+              const groupName = item.group?.name || 'General';
+              const teacherName = item.teacher?.name || 'Staff APEX';
+              const isChamp = Boolean(item.teacher?.is_world_champion);
+
               const slotWhatsAppUrl = getWhatsAppUrl(
-                `¡Hola! Quiero consultar por la clase de ${item.discipline.name} (${item.group.name}) los días ${currentDayName} de ${item.start_time} a ${item.end_time}hs con el profesor ${item.teacher.name}.`
+                `¡Hola! Quiero consultar por la clase de ${disciplineName} (${groupName}) los días ${currentDayName} de ${item.start_time} a ${item.end_time}hs con el profesor ${teacherName}.`
               );
 
               return (
                 <div
                   key={item.id}
                   className={`rounded-2xl p-6 bg-surface-card border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between ${
-                    item.teacher.is_world_champion
+                    isChamp
                       ? 'border-combat-gold/40 hover:border-combat-gold shadow-md shadow-combat-gold/5'
                       : 'border-surface-border hover:border-combat-red/50 hover:shadow-combat-red/5'
                   }`}
@@ -127,14 +132,14 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({ schedules, dis
                       </div>
 
                       <span className="text-[11px] font-semibold text-combat-gold bg-combat-gold/10 px-2.5 py-1 rounded-md border border-combat-gold/20">
-                        {item.group.name}
+                        {groupName}
                       </span>
                     </div>
 
                     {/* Discipline Name */}
                     <div>
                       <h3 className="font-display font-black text-xl text-white uppercase tracking-wide">
-                        {item.discipline.name}
+                        {disciplineName}
                       </h3>
                       {item.notes && (
                         <p className="text-xs text-combat-slate-400 mt-1 font-medium italic">
@@ -151,13 +156,13 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({ schedules, dis
                         </div>
                         <div>
                           <div className="text-xs font-bold text-white flex items-center gap-1">
-                            {item.teacher.name}
-                            {item.teacher.is_world_champion && (
+                            {teacherName}
+                            {isChamp && (
                               <Trophy className="w-3 h-3 text-combat-gold" />
                             )}
                           </div>
                           <div className="text-[10px] text-combat-slate-400">
-                            {item.teacher.is_world_champion
+                            {isChamp
                               ? 'Campeón Mundial'
                               : 'Instructor Titular'}
                           </div>
