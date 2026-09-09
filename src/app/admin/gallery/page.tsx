@@ -14,7 +14,6 @@ export default function AdminGalleryPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [status, setStatus] = useState<{ success?: string; error?: string } | null>(null);
   const [saving, setSaving] = useState(false);
-
   useEffect(() => {
     async function loadGallery() {
       try {
@@ -145,21 +144,46 @@ export default function AdminGalleryPage() {
             </button>
           </div>
 
-          <form key={editingItem ? editingItem.id : 'new'} onSubmit={handleSubmit} className="space-y-5">
-            {editingItem && <input type="hidden" name="id" value={editingItem.id} />}
-
+          <form
+            key={editingItem ? editingItem.id : 'new'}
+            onSubmit={handleSubmit}
+            encType="multipart/form-data"
+            className="space-y-5"
+          >
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
-                URL de la Imagen
+                Imagen
               </label>
+
+              {editingItem?.image_url && (
+                <div className="mb-4 relative w-full h-48 rounded-xl overflow-hidden bg-surface-light border border-surface-border">
+                  <Image
+                    src={editingItem.image_url}
+                    alt={editingItem.alt_text}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+
               <input
-                type="url"
-                name="image_url"
-                defaultValue={editingItem?.image_url || ''}
-                required
-                placeholder="https://images.unsplash.com/..."
-                className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
+                type="hidden"
+                name="existing_image_url"
+                value={editingItem?.image_url || ''}
               />
+
+              <input
+                type="file"
+                name="image"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                required={!editingItem}
+                className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-combat-red file:text-white file:font-bold file:text-xs file:cursor-pointer"
+              />
+
+              <p className="mt-2 text-[11px] text-combat-slate-400">
+                JPG, PNG, WEBP o GIF. Máximo 10 MB.
+                {editingItem && ' Si no seleccionás una nueva imagen, se conserva la actual.'}
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

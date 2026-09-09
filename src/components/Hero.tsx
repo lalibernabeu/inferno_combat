@@ -12,7 +12,7 @@ interface HeroProps {
 export const Hero: React.FC<HeroProps> = ({ settings }) => {
   const whatsAppUrl = getWhatsAppUrl(
     settings.whatsapp_message ||
-      `¡Hola! Quiero solicitar mi primera clase de prueba gratuita en ${settings.name || 'INFERNO COMBAT'}.`
+    `¡Hola! Quiero solicitar mi primera clase de prueba gratuita en ${settings.name || 'INFERNO COMBAT'}.`
   );
 
   return (
@@ -95,7 +95,7 @@ export const Hero: React.FC<HeroProps> = ({ settings }) => {
           </div>
 
           <div className="flex flex-col items-center p-3 rounded-lg bg-surface/40 backdrop-blur-sm border border-surface-border/40">
-            <span className="font-display font-extrabold text-2xl text-combat-red">Ring & Tatami</span>
+            <span className="font-display font-extrabold text-2xl text-combat-red">Bolsas & Tatami</span>
             <span className="text-xs text-combat-slate-400 font-medium">Instalaciones Pro</span>
           </div>
         </div>

@@ -55,7 +55,7 @@ export const ChampionBanner: React.FC<ChampionBannerProps> = ({ champion }) => {
                         Título Mundial
                       </div>
                       <div className="text-xs text-white font-semibold line-clamp-1">
-                        WAKO Pro • 75kg
+                        75kg
                       </div>
                     </div>
                   </div>
