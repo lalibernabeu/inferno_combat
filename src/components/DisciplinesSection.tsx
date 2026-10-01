@@ -2,15 +2,19 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Flame, Users, Activity, ArrowRight, MessageCircle } from 'lucide-react';
+import { Flame, Users, Activity, MessageCircle } from 'lucide-react';
 import { Discipline } from '@/lib/types';
-import { getWhatsAppUrl } from '@/lib/mock-data';
+import { getWhatsAppUrl } from '@/lib/utils';
 
 interface DisciplinesSectionProps {
   disciplines: Discipline[];
 }
 
 export const DisciplinesSection: React.FC<DisciplinesSectionProps> = ({ disciplines }) => {
+  if (!disciplines || disciplines.length === 0) {
+    return null;
+  }
+
   return (
     <section id="disciplinas" className="py-20 relative bg-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,6 +36,7 @@ export const DisciplinesSection: React.FC<DisciplinesSectionProps> = ({ discipli
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {disciplines.map((discipline) => {
             const whatsAppUrl = getWhatsAppUrl(
+              '5492617078248',
               `¡Hola! Quisiera recibir más información y horarios sobre la disciplina de ${discipline.name}.`
             );
 
@@ -42,15 +47,21 @@ export const DisciplinesSection: React.FC<DisciplinesSectionProps> = ({ discipli
               >
                 {/* Image Header */}
                 <div className="relative h-52 w-full overflow-hidden bg-surface-light">
-                  <Image
-                    src={discipline.image_url}
-                    alt={discipline.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
+                  {discipline.image_url ? (
+                    <Image
+                      src={discipline.image_url}
+                      alt={discipline.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-surface-light text-combat-slate-500">
+                      <Flame className="w-12 h-12 text-combat-red/40" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-surface-card via-surface-card/40 to-transparent" />
-                  
+
                   {/* Discipline Title Floating over image */}
                   <div className="absolute bottom-3 left-4 right-4">
                     <h3 className="font-display font-black text-2xl text-white uppercase tracking-wide drop-shadow-md">

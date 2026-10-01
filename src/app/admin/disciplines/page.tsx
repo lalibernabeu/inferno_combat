@@ -2,29 +2,35 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Swords, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Eye, EyeOff, Save, X } from 'lucide-react';
+import { Swords, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Eye, EyeOff, Save, X, Loader2 } from 'lucide-react';
 import { Discipline } from '@/lib/types';
-import { mockDisciplines } from '@/lib/mock-data';
 import { saveDiscipline, deleteDiscipline } from '@/lib/actions/disciplines-actions';
 import { createClient } from '@/lib/supabase/client';
+import { ImageUploadInput } from '@/components/ImageUploadInput';
 
 export default function AdminDisciplinesPage() {
-  const [disciplines, setDisciplines] = useState<Discipline[]>(mockDisciplines);
+  const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const [editingItem, setEditingItem] = useState<Discipline | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [status, setStatus] = useState<{ success?: string; error?: string } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadDisciplines() {
       try {
         const supabase = createClient();
-        const { data, error } = await supabase.from('disciplines').select('*').order('display_order', { ascending: true });
-        if (data && !error && data.length > 0) {
+        const { data, error } = await supabase
+          .from('disciplines')
+          .select('*')
+          .order('display_order', { ascending: true });
+        if (data && !error) {
           setDisciplines(data as Discipline[]);
         }
       } catch (e) {
         console.error('Error loading disciplines:', e);
+      } finally {
+        setLoading(false);
       }
     }
     loadDisciplines();
@@ -54,7 +60,7 @@ export default function AdminDisciplinesPage() {
     if (res?.error) {
       setStatus({ error: res.error });
     } else {
-      setDisciplines(disciplines.filter((d) => d.id !== id));
+      setDisciplines((prev) => prev.filter((d) => d.id !== id));
       setStatus({ success: 'Disciplina eliminada correctamente.' });
     }
   };
@@ -71,8 +77,7 @@ export default function AdminDisciplinesPage() {
       setStatus({ error: res.error });
     } else if (res?.success) {
       setStatus({ success: res.success });
-      // Update local state
-      const updatedId = formData.get('id') as string;
+      const updatedId = res.id || (formData.get('id') as string);
       const newItem: Discipline = {
         id: updatedId || `disc-${Date.now()}`,
         name: formData.get('name') as string,
@@ -86,7 +91,7 @@ export default function AdminDisciplinesPage() {
         display_order: parseInt((formData.get('display_order') as string) || '0', 10),
       };
 
-      if (updatedId) {
+      if (updatedId && disciplines.some((d) => d.id === updatedId)) {
         setDisciplines(disciplines.map((d) => (d.id === updatedId ? newItem : d)));
       } else {
         setDisciplines([...disciplines, newItem]);
@@ -97,6 +102,15 @@ export default function AdminDisciplinesPage() {
     setSaving(false);
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <Loader2 className="w-8 h-8 text-combat-red animate-spin" />
+        <p className="text-sm text-combat-slate-400">Cargando disciplinas de la base de datos...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -106,7 +120,7 @@ export default function AdminDisciplinesPage() {
             Gestión de Disciplinas
           </h2>
           <p className="text-xs text-combat-slate-400 mt-1">
-            Crea y edita las disciplinas de combate (Kickboxing, Boxeo, BJJ, etc.)
+            Administra las artes marciales y clases impartidas en el gimnasio.
           </p>
         </div>
         {!isCreating && !editingItem && (
@@ -134,13 +148,13 @@ export default function AdminDisciplinesPage() {
         </div>
       )}
 
-      {/* Create / Edit Form */}
+      {/* Create / Edit Form Modal/Card */}
       {(isCreating || editingItem) && (
         <div className="p-6 rounded-2xl bg-surface-card border border-combat-red/40 space-y-6 shadow-2xl animate-in fade-in">
           <div className="flex items-center justify-between pb-4 border-b border-surface-border/60">
             <h3 className="font-display font-bold text-lg text-white uppercase flex items-center gap-2">
               <Swords className="w-5 h-5 text-combat-red" />
-              <span>{editingItem ? `Editar: ${editingItem.name}` : 'Nueva Disciplina de Combate'}</span>
+              <span>{editingItem ? `Editar: ${editingItem.name}` : 'Crear Nueva Disciplina'}</span>
             </h3>
             <button
               onClick={handleCancel}
@@ -150,10 +164,10 @@ export default function AdminDisciplinesPage() {
             </button>
           </div>
 
-          <form key={editingItem ? editingItem.id : 'new'} onSubmit={handleSubmit} className="space-y-5">
-            {editingItem && <input type="hidden" name="id" value={editingItem.id} />}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <input type="hidden" name="id" defaultValue={editingItem?.id || ''} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
                   Nombre de la Disciplina
@@ -170,7 +184,7 @@ export default function AdminDisciplinesPage() {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
-                  Slug (Identificador URL)
+                  Slug URL (Identificador)
                 </label>
                 <input
                   type="text"
@@ -250,19 +264,16 @@ export default function AdminDisciplinesPage() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
-                URL de Imagen / Foto
-              </label>
-              <input
-                type="url"
-                name="image_url"
-                defaultValue={editingItem?.image_url || ''}
-                required
-                placeholder="https://images.unsplash.com/..."
-                className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
-              />
-            </div>
+            {/* Subida o selección de imagen */}
+            <ImageUploadInput
+              name="image_url"
+              defaultValue={editingItem?.image_url || ''}
+              label="Imagen de la Disciplina"
+              folder="disciplines"
+              aspectRatio="landscape"
+              helperText="Podés subir una foto desde tu dispositivo o ingresar una URL de imagen."
+              required
+            />
 
             <div className="flex items-center gap-3 pt-2">
               <input
@@ -300,77 +311,93 @@ export default function AdminDisciplinesPage() {
 
       {/* Disciplines Table */}
       <div className="rounded-2xl bg-surface-card border border-surface-border overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-combat-slate-300">
-            <thead className="bg-surface-light border-b border-surface-border text-xs font-bold uppercase tracking-wider text-combat-slate-400">
-              <tr>
-                <th className="px-6 py-4">Foto</th>
-                <th className="px-6 py-4">Disciplina</th>
-                <th className="px-6 py-4">Público / Nivel</th>
-                <th className="px-6 py-4">Orden</th>
-                <th className="px-6 py-4">Estado</th>
-                <th className="px-6 py-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-surface-border/60">
-              {disciplines.map((disc) => (
-                <tr key={disc.id} className="hover:bg-surface-light/40 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-surface-light border border-surface-border">
-                      <Image
-                        src={disc.image_url}
-                        alt={disc.name}
-                        fill
-                        className="object-cover"
-                        sizes="60px"
-                      />
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="font-bold text-white text-base">{disc.name}</div>
-                    <div className="text-xs text-combat-slate-400 font-mono mt-0.5">{disc.slug}</div>
-                  </td>
-                  <td className="px-6 py-4 text-xs space-y-1">
-                    <div>👥 {disc.target_audience}</div>
-                    <div className="text-combat-gold">⚡ {disc.level_info}</div>
-                  </td>
-                  <td className="px-6 py-4 font-bold text-white">{disc.display_order}</td>
-                  <td className="px-6 py-4">
-                    {disc.is_active ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">
-                        <Eye className="w-3 h-3" />
-                        <span>Activa</span>
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-combat-slate-700 text-combat-slate-400 text-xs font-semibold">
-                        <EyeOff className="w-3 h-3" />
-                        <span>Oculta</span>
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => handleEdit(disc)}
-                        className="p-2 rounded-lg bg-surface-light text-combat-slate-300 hover:text-white hover:bg-combat-red/20 transition-colors"
-                        title="Editar"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(disc.id)}
-                        className="p-2 rounded-lg bg-surface-light text-combat-red hover:bg-combat-red/20 transition-colors"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+        {disciplines.length === 0 ? (
+          <div className="text-center py-16 px-4">
+            <Swords className="w-12 h-12 text-combat-slate-500 mx-auto mb-3" />
+            <p className="text-base text-white font-bold">No hay disciplinas registradas en la base de datos</p>
+            <p className="text-xs text-combat-slate-400 mt-1">
+              Haz clic en "Nueva Disciplina" para agregar la primera clase a tu gimnasio.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-combat-slate-300">
+              <thead className="bg-surface-light border-b border-surface-border text-xs font-bold uppercase tracking-wider text-combat-slate-400">
+                <tr>
+                  <th className="px-6 py-4">Foto</th>
+                  <th className="px-6 py-4">Disciplina</th>
+                  <th className="px-6 py-4">Público / Nivel</th>
+                  <th className="px-6 py-4">Orden</th>
+                  <th className="px-6 py-4">Estado</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-surface-border/60">
+                {disciplines.map((disc) => (
+                  <tr key={disc.id} className="hover:bg-surface-light/40 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-surface-light border border-surface-border">
+                        {disc.image_url ? (
+                          <Image
+                            src={disc.image_url}
+                            alt={disc.name}
+                            fill
+                            className="object-cover"
+                            sizes="60px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-combat-slate-500">
+                            <Swords className="w-5 h-5" />
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-white text-base">{disc.name}</div>
+                      <div className="text-xs text-combat-slate-400 font-mono mt-0.5">{disc.slug}</div>
+                    </td>
+                    <td className="px-6 py-4 text-xs space-y-1">
+                      <div>👥 {disc.target_audience}</div>
+                      <div className="text-combat-gold">⚡ {disc.level_info}</div>
+                    </td>
+                    <td className="px-6 py-4 font-bold text-white">{disc.display_order}</td>
+                    <td className="px-6 py-4">
+                      {disc.is_active ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">
+                          <Eye className="w-3 h-3" />
+                          <span>Activa</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-combat-slate-700 text-combat-slate-400 text-xs font-semibold">
+                          <EyeOff className="w-3 h-3" />
+                          <span>Oculta</span>
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEdit(disc)}
+                          className="p-2 rounded-lg bg-surface-light text-combat-slate-300 hover:text-white hover:bg-combat-red/20 transition-colors"
+                          title="Editar"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(disc.id)}
+                          className="p-2 rounded-lg bg-surface-light text-combat-red hover:bg-combat-red/20 transition-colors"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

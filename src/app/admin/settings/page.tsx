@@ -3,11 +3,33 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Save, CheckCircle2, AlertCircle, Phone, MessageCircle, MapPin, Globe, Sparkles } from 'lucide-react';
 import { updateGymSettings } from '@/lib/actions/settings-actions';
-import { mockGymSettings } from '@/lib/mock-data';
+import { GymSettings } from '@/lib/types';
 import { createClient } from '@/lib/supabase/client';
+import { ImageUploadInput } from '@/components/ImageUploadInput';
+
+const defaultSettings: GymSettings = {
+  id: 'settings-default',
+  name: 'INFERNO COMBAT',
+  slogan: 'Forja tu carácter. Domina el combate.',
+  short_description: 'Centro de alto rendimiento en deportes de combate y artes marciales.',
+  about_text: 'En INFERNO COMBAT combinamos la disciplina del entrenamiento de combate con la metodología más avanzada de preparación física.',
+  address: 'Av. San Martín 1234',
+  city: 'Mendoza',
+  phone: '+54 9 261 707-8248',
+  whatsapp_number: '5492617078248',
+  whatsapp_message: '¡Hola! Quisiera consultar por las clases de combate en INFERNO COMBAT.',
+  instagram_url: 'https://instagram.com/infernocombat',
+  facebook_url: 'https://facebook.com/infernocombat',
+  google_maps_embed_url: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3350.2!2d-68.8!3d-32.8!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzLCsDQ4JzAwLjAiUyA2OMKwNDgnMDAuMCJX!5e0!3m2!1ses!2sar!4v1700000000000!5m2!1ses!2sar',
+  google_maps_link: 'https://maps.google.com/?q=Mendoza,+Argentina',
+  logo_url: '/images/logo.png',
+  hero_bg_url: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&w=2000&q=80',
+  seo_title: 'INFERNO COMBAT | Kickboxing, Boxeo, K1 y Muay Thai',
+  seo_description: 'Gimnasio de deportes de combate en Mendoza. Clases de Kickboxing, Boxeo, K1 y Muay Thai con profesores experimentados.',
+};
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState(mockGymSettings);
+  const [settings, setSettings] = useState<GymSettings>(defaultSettings);
   const [status, setStatus] = useState<{ success?: string; error?: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -18,7 +40,7 @@ export default function AdminSettingsPage() {
         const supabase = createClient();
         const { data, error } = await supabase.from('gym_settings').select('*').limit(1).maybeSingle();
         if (data && !error) {
-          setSettings(data as any);
+          setSettings(data as GymSettings);
         }
       } catch (e) {
         console.error('Error loading settings from Supabase:', e);
@@ -101,10 +123,8 @@ export default function AdminSettingsPage() {
         </div>
       )}
 
-      <form key={settings.id || 'settings-form'} onSubmit={handleSubmit} className="space-y-8">
-        <input type="hidden" name="id" value={settings.id} />
-
-        {/* 1. Identidad del Gimnasio */}
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* 1. Identidad Institucional */}
         <div className="p-6 rounded-2xl bg-surface-card border border-surface-border space-y-5">
           <div className="flex items-center gap-2 pb-3 border-b border-surface-border/60">
             <Sparkles className="w-5 h-5 text-combat-red" />
@@ -167,18 +187,16 @@ export default function AdminSettingsPage() {
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
-              URL Imagen de Fondo del Hero
-            </label>
-            <input
-              type="url"
-              name="hero_bg_url"
-              defaultValue={settings.hero_bg_url}
-              required
-              className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
-            />
-          </div>
+          {/* Imagen de fondo del Hero con soporte de upload móvil */}
+          <ImageUploadInput
+            name="hero_bg_url"
+            defaultValue={settings.hero_bg_url}
+            label="Imagen de Fondo del Banner Principal (Hero)"
+            folder="settings"
+            aspectRatio="banner"
+            helperText="Puedes subir una foto horizontal de las instalaciones o portada de combate."
+            required
+          />
         </div>
 
         {/* 2. Contacto & WhatsApp */}
@@ -199,7 +217,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 name="whatsapp_number"
                 defaultValue={settings.whatsapp_number}
-                placeholder="5491155558899"
+                placeholder="5492617078248"
                 required
                 className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
               />
@@ -234,36 +252,37 @@ export default function AdminSettingsPage() {
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
-              Mensaje Predefinido de WhatsApp
-            </label>
-            <input
-              type="text"
-              name="whatsapp_message"
-              defaultValue={settings.whatsapp_message}
-              required
-              className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
               Facebook URL (Opcional)
             </label>
             <input
               type="url"
               name="facebook_url"
               defaultValue={settings.facebook_url || ''}
+              placeholder="https://facebook.com/..."
+              className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
+              Mensaje Predefinido de WhatsApp
+            </label>
+            <textarea
+              name="whatsapp_message"
+              defaultValue={settings.whatsapp_message}
+              rows={2}
+              required
               className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
             />
           </div>
         </div>
 
-        {/* 3. Ubicación y Mapas */}
+        {/* 3. Ubicación y Dirección */}
         <div className="p-6 rounded-2xl bg-surface-card border border-surface-border space-y-5">
           <div className="flex items-center gap-2 pb-3 border-b border-surface-border/60">
             <MapPin className="w-5 h-5 text-combat-gold" />
             <h3 className="font-display font-bold text-base text-white uppercase">
-              Ubicación & Google Maps
+              Ubicación y Google Maps
             </h3>
           </div>
 

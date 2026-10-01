@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Instagram, Facebook, MapPin, Phone, MessageCircle, ArrowUp } from 'lucide-react';
 import { BullLogo } from './BullLogo';
 import { GymSettings, Discipline } from '@/lib/types';
-import { getWhatsAppUrl } from '@/lib/mock-data';
+import { getWhatsAppUrl } from '@/lib/utils';
 
 interface FooterProps {
   settings: GymSettings;
@@ -13,7 +13,10 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ settings, disciplines }) => {
-  const whatsAppUrl = getWhatsAppUrl();
+  const whatsAppUrl = getWhatsAppUrl(
+    settings.whatsapp_number,
+    settings.whatsapp_message
+  );
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -39,15 +42,17 @@ export const Footer: React.FC<FooterProps> = ({ settings, disciplines }) => {
             </p>
 
             <div className="flex items-center gap-3 pt-2">
-              <a
-                href={settings.instagram_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-surface-light border border-surface-border flex items-center justify-center text-combat-slate-300 hover:text-white hover:border-pink-500 hover:bg-pink-500/10 transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
+              {settings.instagram_url && (
+                <a
+                  href={settings.instagram_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-xl bg-surface-light border border-surface-border flex items-center justify-center text-combat-slate-300 hover:text-white hover:border-pink-500 hover:bg-pink-500/10 transition-colors"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="w-5 h-5" />
+                </a>
+              )}
 
               {settings.facebook_url && (
                 <a
@@ -110,11 +115,8 @@ export const Footer: React.FC<FooterProps> = ({ settings, disciplines }) => {
                 </Link>
               </li>
               <li>
-                <Link href="/tienda" className="text-amber-400 hover:text-amber-300 font-medium transition-colors flex items-center gap-1.5">
-                  <span>Tienda Oficial</span>
-                  <span className="text-[9px] bg-amber-500/20 border border-amber-500/30 px-1 py-0.2 rounded font-bold uppercase">
-                    Pronto
-                  </span>
+                <Link href="/#contacto" className="hover:text-white transition-colors">
+                  Contacto
                 </Link>
               </li>
             </ul>
@@ -126,13 +128,17 @@ export const Footer: React.FC<FooterProps> = ({ settings, disciplines }) => {
               Disciplinas
             </div>
             <ul className="space-y-2.5 text-sm">
-              {disciplines.map((disc) => (
-                <li key={disc.id}>
-                  <Link href="/#disciplinas" className="hover:text-white transition-colors">
-                    {disc.name}
-                  </Link>
-                </li>
-              ))}
+              {disciplines && disciplines.length > 0 ? (
+                disciplines.map((disc) => (
+                  <li key={disc.id}>
+                    <Link href="/#disciplinas" className="hover:text-white transition-colors">
+                      {disc.name}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <li className="text-combat-slate-500">Próximamente</li>
+              )}
             </ul>
           </div>
 
@@ -168,7 +174,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, disciplines }) => {
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <p className="text-combat-slate-500">
-            © {new Date().getFullYear()} {settings.name}. Todos los derechos reservados. Pagina creada por Lali Bernabeu
+            © {new Date().getFullYear()} {settings.name}. Todos los derechos reservados.
           </p>
 
           <button

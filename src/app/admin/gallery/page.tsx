@@ -2,28 +2,34 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Image as ImageIcon, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Eye, EyeOff, Save, X, Maximize2 } from 'lucide-react';
+import { Image as ImageIcon, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Eye, EyeOff, Save, X, Loader2 } from 'lucide-react';
 import { GalleryItem } from '@/lib/types';
-import { mockGallery } from '@/lib/mock-data';
 import { saveGalleryItem, deleteGalleryItem } from '@/lib/actions/gallery-actions';
 import { createClient } from '@/lib/supabase/client';
 
 export default function AdminGalleryPage() {
-  const [gallery, setGallery] = useState<GalleryItem[]>(mockGallery);
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [status, setStatus] = useState<{ success?: string; error?: string } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     async function loadGallery() {
       try {
         const supabase = createClient();
-        const { data, error } = await supabase.from('gallery').select('*').order('display_order', { ascending: true });
-        if (data && !error && data.length > 0) {
+        const { data, error } = await supabase
+          .from('gallery')
+          .select('*')
+          .order('display_order', { ascending: true });
+        if (data && !error) {
           setGallery(data as GalleryItem[]);
         }
       } catch (e) {
         console.error('Error loading gallery from Supabase:', e);
+      } finally {
+        setLoading(false);
       }
     }
     loadGallery();
@@ -53,7 +59,7 @@ export default function AdminGalleryPage() {
     if (res?.error) {
       setStatus({ error: res.error });
     } else {
-      setGallery(gallery.filter((g) => g.id !== id));
+      setGallery((prev) => prev.filter((g) => g.id !== id));
       setStatus({ success: 'Foto eliminada con éxito.' });
     }
   };
@@ -70,26 +76,31 @@ export default function AdminGalleryPage() {
       setStatus({ error: res.error });
     } else if (res?.success) {
       setStatus({ success: res.success });
-      const updatedId = (res as any)?.id || (formData.get('id') as string);
-      const newItem: GalleryItem = {
-        id: updatedId || `gal-${Date.now()}`,
-        image_url: formData.get('image_url') as string,
-        alt_text: formData.get('alt_text') as string,
-        caption: (formData.get('caption') as string) || undefined,
-        is_active: formData.get('is_active') === 'on',
-        display_order: parseInt((formData.get('display_order') as string) || '0', 10),
-      };
+      const updatedId = res.id || (formData.get('id') as string);
+      
+      // Reload gallery from Supabase to ensure fresh storage URLs
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.from('gallery').select('*').order('display_order', { ascending: true });
+        if (data) {
+          setGallery(data as GalleryItem[]);
+        }
+      } catch {}
 
-      if (updatedId && gallery.some((g) => g.id === updatedId)) {
-        setGallery(gallery.map((g) => (g.id === updatedId ? newItem : g)));
-      } else {
-        setGallery([...gallery, newItem]);
-      }
       setIsCreating(false);
       setEditingItem(null);
     }
     setSaving(false);
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <Loader2 className="w-8 h-8 text-combat-red animate-spin" />
+        <p className="text-sm text-combat-slate-400">Cargando fotos de la galería...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -150,9 +161,11 @@ export default function AdminGalleryPage() {
             encType="multipart/form-data"
             className="space-y-5"
           >
+            <input type="hidden" name="id" defaultValue={editingItem?.id || ''} />
+
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
-                Imagen
+                Foto / Archivo de Imagen
               </label>
 
               {editingItem?.image_url && (
@@ -189,7 +202,7 @@ export default function AdminGalleryPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
-                  Texto Alternativo (Alt Text para SEO y Accesibilidad)
+                  Texto Alternativo (Alt Text para SEO)
                 </label>
                 <input
                   type="text"
@@ -203,7 +216,7 @@ export default function AdminGalleryPage() {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
-                  Pie de Foto / Caption (Visible al pasar el cursor y en el modal)
+                  Pie de Foto / Caption (Opcional)
                 </label>
                 <input
                   type="text"
@@ -232,13 +245,13 @@ export default function AdminGalleryPage() {
               <div className="flex items-center gap-3 pt-6">
                 <input
                   type="checkbox"
-                  id="is_active_gallery"
+                  id="gallery_is_active"
                   name="is_active"
                   defaultChecked={editingItem ? editingItem.is_active : true}
                   className="w-4 h-4 rounded text-combat-red focus:ring-combat-red"
                 />
-                <label htmlFor="is_active_gallery" className="text-sm font-semibold text-white cursor-pointer">
-                  Visible y activa en la galería
+                <label htmlFor="gallery_is_active" className="text-sm font-semibold text-white cursor-pointer">
+                  Visible en la galería pública
                 </label>
               </div>
             </div>
@@ -264,63 +277,77 @@ export default function AdminGalleryPage() {
         </div>
       )}
 
-      {/* Gallery Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {gallery.map((item) => (
-          <div
-            key={item.id}
-            className="rounded-2xl bg-surface-card border border-surface-border overflow-hidden flex flex-col justify-between shadow-xl"
-          >
-            <div className="relative h-48 w-full bg-surface-light">
-              <Image
-                src={item.image_url}
-                alt={item.alt_text}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 33vw"
-              />
-            </div>
-
-            <div className="p-4 space-y-2">
-              <p className="text-xs font-semibold text-white line-clamp-1">
-                {item.caption || item.alt_text}
-              </p>
-              <p className="text-[11px] text-combat-slate-400">Orden: {item.display_order}</p>
-
-              <div className="flex items-center justify-between pt-2 border-t border-surface-border/50">
-                <span className="text-xs">
+      {/* Gallery Grid Display */}
+      {gallery.length === 0 ? (
+        <div className="rounded-2xl bg-surface-card border border-surface-border p-16 text-center shadow-xl">
+          <ImageIcon className="w-12 h-12 text-combat-slate-500 mx-auto mb-3" />
+          <p className="text-base text-white font-bold">No hay fotos en la galería todavía</p>
+          <p className="text-xs text-combat-slate-400 mt-1">
+            Haz clic en "Nueva Foto" para subir imágenes de tus clases e instalaciones.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {gallery.map((item) => (
+            <div
+              key={item.id}
+              className="rounded-2xl bg-surface-card border border-surface-border overflow-hidden flex flex-col group hover:border-combat-red/50 transition-all duration-300 shadow-xl"
+            >
+              <div className="relative h-48 w-full bg-surface-light overflow-hidden">
+                <Image
+                  src={item.image_url}
+                  alt={item.alt_text}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+                <div className="absolute top-2 right-2 flex items-center gap-1">
                   {item.is_active ? (
-                    <span className="text-emerald-400 font-semibold text-xs flex items-center gap-1">
-                      <Eye className="w-3.5 h-3.5" /> Activa
+                    <span className="px-2 py-0.5 rounded-md bg-emerald-500/80 backdrop-blur-sm text-white text-[10px] font-bold">
+                      Activa
                     </span>
                   ) : (
-                    <span className="text-combat-slate-400 text-xs flex items-center gap-1">
-                      <EyeOff className="w-3.5 h-3.5" /> Oculta
+                    <span className="px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-sm text-combat-slate-300 text-[10px] font-bold">
+                      Oculta
                     </span>
                   )}
-                </span>
+                  <span className="px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-sm text-white text-[10px] font-bold">
+                    #{item.display_order}
+                  </span>
+                </div>
+              </div>
 
-                <div className="flex items-center gap-2">
+              <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                <div>
+                  <p className="text-xs font-bold text-white line-clamp-1">{item.alt_text}</p>
+                  {item.caption && (
+                    <p className="text-[11px] text-combat-slate-400 italic line-clamp-2 mt-1">
+                      "{item.caption}"
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-surface-border/60">
                   <button
                     onClick={() => handleEdit(item)}
-                    className="p-1.5 rounded-lg bg-surface-light text-combat-slate-300 hover:text-white hover:bg-combat-red/20 transition-colors"
+                    className="p-2 rounded-lg bg-surface-light text-combat-slate-300 hover:text-white hover:bg-combat-red/20 transition-colors"
                     title="Editar"
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
+                    <Edit2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(item.id)}
-                    className="p-1.5 rounded-lg bg-surface-light text-combat-red hover:bg-combat-red/20 transition-colors"
+                    className="p-2 rounded-lg bg-surface-light text-combat-red hover:bg-combat-red/20 transition-colors"
                     title="Eliminar"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

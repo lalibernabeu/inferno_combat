@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Calendar, Clock, User, MessageCircle, Filter, Trophy, Sparkles } from 'lucide-react';
+import { Calendar, Clock, User, MessageCircle, Trophy } from 'lucide-react';
 import { ScheduleWithDetails, Discipline } from '@/lib/types';
-import { getWhatsAppUrl } from '@/lib/mock-data';
+import { getWhatsAppUrl } from '@/lib/utils';
 
 interface ScheduleSectionProps {
   schedules: ScheduleWithDetails[];
@@ -28,10 +28,11 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({ schedules, dis
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>('all');
 
   const filteredSchedules = useMemo(() => {
+    if (!schedules || schedules.length === 0) return [];
     return schedules
       .filter((s) => s.day_of_week === selectedDay)
       .filter((s) => (selectedDiscipline === 'all' ? true : s.discipline_id === selectedDiscipline))
-      .sort((a, b) => a.start_time.localeCompare(b.start_time));
+      .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
   }, [schedules, selectedDay, selectedDiscipline]);
 
   return (
@@ -72,31 +73,33 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({ schedules, dis
         </div>
 
         {/* Optional Discipline Filter Bar */}
-        <div className="flex items-center justify-start sm:justify-center overflow-x-auto pb-4 gap-2 no-scrollbar mb-10">
-          <button
-            onClick={() => setSelectedDiscipline('all')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-              selectedDiscipline === 'all'
-                ? 'bg-surface-light text-white border border-combat-slate-400'
-                : 'text-combat-slate-400 hover:text-combat-slate-200 bg-surface-card/60 border border-surface-border'
-            }`}
-          >
-            Todas las disciplinas
-          </button>
-          {disciplines.map((disc) => (
+        {disciplines && disciplines.length > 0 && (
+          <div className="flex items-center justify-start sm:justify-center overflow-x-auto pb-4 gap-2 no-scrollbar mb-10">
             <button
-              key={disc.id}
-              onClick={() => setSelectedDiscipline(disc.id)}
+              onClick={() => setSelectedDiscipline('all')}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-                selectedDiscipline === disc.id
-                  ? 'bg-combat-red/20 text-combat-red border border-combat-red/60'
+                selectedDiscipline === 'all'
+                  ? 'bg-surface-light text-white border border-combat-slate-400'
                   : 'text-combat-slate-400 hover:text-combat-slate-200 bg-surface-card/60 border border-surface-border'
               }`}
             >
-              {disc.name}
+              Todas las disciplinas
             </button>
-          ))}
-        </div>
+            {disciplines.map((disc) => (
+              <button
+                key={disc.id}
+                onClick={() => setSelectedDiscipline(disc.id)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                  selectedDiscipline === disc.id
+                    ? 'bg-combat-red/20 text-combat-red border border-combat-red/60'
+                    : 'text-combat-slate-400 hover:text-combat-slate-200 bg-surface-card/60 border border-surface-border'
+                }`}
+              >
+                {disc.name}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Schedules Grid / Vertical Cards */}
         {filteredSchedules.length > 0 ? (
@@ -109,6 +112,7 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({ schedules, dis
               const isChamp = Boolean(item.teacher?.is_world_champion);
 
               const slotWhatsAppUrl = getWhatsAppUrl(
+                '5492617078248',
                 `¡Hola! Quiero consultar por la clase de ${disciplineName} (${groupName}) los días ${currentDayName} de ${item.start_time} a ${item.end_time}hs con el profesor ${teacherName}.`
               );
 
@@ -191,14 +195,16 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({ schedules, dis
           <div className="text-center py-16 bg-surface-card rounded-2xl border border-surface-border">
             <Calendar className="w-12 h-12 text-combat-slate-500 mx-auto mb-3" />
             <p className="text-base text-combat-slate-300 font-semibold">
-              No hay clases programadas con el filtro seleccionado para este día.
+              No hay clases programadas para este día todavía.
             </p>
-            <button
-              onClick={() => setSelectedDiscipline('all')}
-              className="mt-4 px-4 py-2 rounded-lg bg-combat-red text-white text-xs font-bold uppercase tracking-wide hover:bg-combat-red-hover transition-colors"
-            >
-              Ver todas las clases
-            </button>
+            {selectedDiscipline !== 'all' && (
+              <button
+                onClick={() => setSelectedDiscipline('all')}
+                className="mt-4 px-4 py-2 rounded-lg bg-combat-red text-white text-xs font-bold uppercase tracking-wide hover:bg-combat-red-hover transition-colors"
+              >
+                Ver todas las clases
+              </button>
+            )}
           </div>
         )}
       </div>

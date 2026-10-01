@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Users, Smile, ShieldAlert, Zap, Trophy, CheckCircle } from 'lucide-react';
+import { Users, Smile, Zap, Trophy } from 'lucide-react';
 import { Group } from '@/lib/types';
 
 interface GroupsSectionProps {
@@ -9,8 +9,12 @@ interface GroupsSectionProps {
 }
 
 export const GroupsSection: React.FC<GroupsSectionProps> = ({ groups }) => {
+  if (!groups || groups.length === 0) {
+    return null;
+  }
+
   const getGroupIcon = (index: number) => {
-    switch (index) {
+    switch (index % 4) {
       case 0:
         return Smile;
       case 1:
@@ -44,23 +48,14 @@ export const GroupsSection: React.FC<GroupsSectionProps> = ({ groups }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {groups.map((group, index) => {
             const Icon = getGroupIcon(index);
-            const isCompetition = index === 3;
 
             return (
               <div
                 key={group.id}
-                className={`rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${isCompetition
-                    ? 'bg-gradient-to-b from-surface-card to-combat-red/10 border border-combat-red/40 shadow-lg shadow-combat-red/10'
-                    : 'bg-surface-card border border-surface-border hover:border-surface-hover'
-                  }`}
+                className="rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 bg-surface-card border border-surface-border hover:border-combat-red/40"
               >
                 <div>
-                  <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${isCompetition
-                        ? 'bg-combat-red text-white'
-                        : 'bg-surface-light border border-surface-border text-combat-gold'
-                      }`}
-                  >
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-surface-light border border-surface-border text-combat-gold">
                     <Icon className="w-6 h-6" />
                   </div>
 
@@ -70,12 +65,16 @@ export const GroupsSection: React.FC<GroupsSectionProps> = ({ groups }) => {
 
                   {/* Age & Level Badges */}
                   <div className="flex flex-col gap-1.5 mb-4">
-                    <span className="inline-block text-xs font-bold text-combat-slate-300 bg-surface-light px-2.5 py-1 rounded-md border border-surface-border/50">
-                      <span className="text-white">{group.age_range}</span>
-                    </span>
-                    <span className="inline-block text-xs font-bold text-combat-gold bg-combat-gold/10 px-2.5 py-1 rounded-md border border-combat-gold/20">
-                      Nivel: {group.level}
-                    </span>
+                    {group.age_range && (
+                      <span className="inline-block text-xs font-bold text-combat-slate-300 bg-surface-light px-2.5 py-1 rounded-md border border-surface-border/50">
+                        <span className="text-white">{group.age_range}</span>
+                      </span>
+                    )}
+                    {group.level && (
+                      <span className="inline-block text-xs font-bold text-combat-gold bg-combat-gold/10 px-2.5 py-1 rounded-md border border-combat-gold/20">
+                        Nivel: {group.level}
+                      </span>
+                    )}
                   </div>
 
                   <p className="text-sm text-combat-slate-300 leading-relaxed">

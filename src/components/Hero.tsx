@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { MessageCircle, Calendar, Trophy, Zap, Shield, ArrowRight, Star } from 'lucide-react';
+import { MessageCircle, Calendar, Trophy, ArrowRight } from 'lucide-react';
 import { GymSettings } from '@/lib/types';
-import { getWhatsAppUrl } from '@/lib/mock-data';
+import { getWhatsAppUrl } from '@/lib/utils';
 
 interface HeroProps {
   settings: GymSettings;
@@ -11,8 +11,9 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ settings }) => {
   const whatsAppUrl = getWhatsAppUrl(
+    settings.whatsapp_number,
     settings.whatsapp_message ||
-    `¡Hola! Quiero solicitar mi primera clase de prueba gratuita en ${settings.name || 'INFERNO COMBAT'}.`
+      `¡Hola! Quiero solicitar mi primera clase de prueba gratuita en ${settings.name || 'INFERNO COMBAT'}.`
   );
 
   return (
@@ -50,9 +51,8 @@ export const Hero: React.FC<HeroProps> = ({ settings }) => {
 
         {/* Subtitle / Description */}
         <p className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-combat-slate-300 font-normal leading-relaxed mb-9">
-          Kickboxing, Boxeo, K1 y Muay Thai en un entorno de alto nivel. Aprende defensa
-          personal real, mejora tu condición física extrema o prepárate para competir con los
-          mejores.
+          {settings.short_description ||
+            'Kickboxing, Boxeo, K1 y Muay Thai en un entorno de alto nivel. Aprende defensa personal real, mejora tu condición física extrema o prepárate para competir con los mejores.'}
         </p>
 
         {/* Action Buttons */}
@@ -90,13 +90,13 @@ export const Hero: React.FC<HeroProps> = ({ settings }) => {
           </div>
 
           <div className="flex flex-col items-center p-3 rounded-lg bg-surface/40 backdrop-blur-sm border border-surface-border/40">
-            <span className="font-display font-extrabold text-2xl text-white">6</span>
-            <span className="text-xs text-combat-slate-400 font-medium">Disciplinas de Élite</span>
+            <span className="font-display font-extrabold text-2xl text-white">Tatami</span>
+            <span className="text-xs text-combat-slate-400 font-medium">Alto Impacto</span>
           </div>
 
           <div className="flex flex-col items-center p-3 rounded-lg bg-surface/40 backdrop-blur-sm border border-surface-border/40">
-            <span className="font-display font-extrabold text-2xl text-combat-red">Bolsas & Tatami</span>
-            <span className="text-xs text-combat-slate-400 font-medium">Instalaciones Pro</span>
+            <span className="font-display font-extrabold text-2xl text-combat-red">Bolsas Pro</span>
+            <span className="text-xs text-combat-slate-400 font-medium">Zona de Golpeo</span>
           </div>
         </div>
       </div>

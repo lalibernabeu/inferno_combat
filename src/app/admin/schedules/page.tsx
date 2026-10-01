@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { CalendarDays, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Clock, Eye, EyeOff, Save, X } from 'lucide-react';
+import { CalendarDays, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Clock, Eye, EyeOff, Save, X, Loader2 } from 'lucide-react';
 import { ScheduleWithDetails, Discipline, Teacher, Group } from '@/lib/types';
-import { mockDisciplines, mockTeachers, mockGroups, getSchedulesWithDetails } from '@/lib/mock-data';
 import { saveSchedule, deleteSchedule } from '@/lib/actions/schedules-actions';
 import { createClient } from '@/lib/supabase/client';
 
@@ -17,15 +16,16 @@ const DAYS = [
 ];
 
 export default function AdminSchedulesPage() {
-  const [schedules, setSchedules] = useState<ScheduleWithDetails[]>(getSchedulesWithDetails());
-  const [disciplines, setDisciplines] = useState<Discipline[]>(mockDisciplines);
-  const [teachers, setTeachers] = useState<Teacher[]>(mockTeachers);
-  const [groups, setGroups] = useState<Group[]>(mockGroups);
+  const [schedules, setSchedules] = useState<ScheduleWithDetails[]>([]);
+  const [disciplines, setDisciplines] = useState<Discipline[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [selectedDay, setSelectedDay] = useState<number>(1);
   const [editingItem, setEditingItem] = useState<ScheduleWithDetails | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [status, setStatus] = useState<{ success?: string; error?: string } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
@@ -46,20 +46,22 @@ export default function AdminSchedulesPage() {
           supabase.from('groups').select('*').order('display_order', { ascending: true }),
         ]);
 
-        if (disciplinesData && disciplinesData.length > 0) {
+        if (disciplinesData) {
           setDisciplines(disciplinesData as Discipline[]);
         }
-        if (teachersData && teachersData.length > 0) {
+        if (teachersData) {
           setTeachers(teachersData as Teacher[]);
         }
-        if (groupsData && groupsData.length > 0) {
+        if (groupsData) {
           setGroups(groupsData as Group[]);
         }
-        if (schedulesData && schedulesData.length > 0) {
+        if (schedulesData) {
           setSchedules(schedulesData as ScheduleWithDetails[]);
         }
       } catch (e) {
         console.error('Error loading schedules data from Supabase:', e);
+      } finally {
+        setLoading(false);
       }
     }
     loadData();
@@ -91,7 +93,7 @@ export default function AdminSchedulesPage() {
     if (res?.error) {
       setStatus({ error: res.error });
     } else {
-      setSchedules(schedules.filter((s) => s.id !== id));
+      setSchedules((prev) => prev.filter((s) => s.id !== id));
       setStatus({ success: 'Horario eliminado con éxito.' });
     }
   };
@@ -109,31 +111,27 @@ export default function AdminSchedulesPage() {
     } else if (res?.success) {
       setStatus({ success: res.success });
       const updatedId = (res as any)?.id || (formData.get('id') as string);
-      const disciplineId = formData.get('discipline_id') as string;
-      const teacherId = formData.get('teacher_id') as string;
-      const groupId = formData.get('group_id') as string;
-
-      const discipline = disciplines.find((d) => d.id === disciplineId) || disciplines[0];
-      const teacher = teachers.find((t) => t.id === teacherId) || teachers[0];
-      const group = groups.find((g) => g.id === groupId) || groups[0];
+      const discId = formData.get('discipline_id') as string;
+      const tId = formData.get('teacher_id') as string;
+      const gId = formData.get('group_id') as string;
 
       const newItem: ScheduleWithDetails = {
-        id: updatedId || `sch-${Date.now()}`,
-        day_of_week: parseInt(formData.get('day_of_week') as string, 10),
+        id: updatedId || `sched-${Date.now()}`,
+        day_of_week: parseInt((formData.get('day_of_week') as string) || '1', 10),
         start_time: formData.get('start_time') as string,
         end_time: formData.get('end_time') as string,
-        discipline_id: disciplineId,
-        teacher_id: teacherId,
-        group_id: groupId,
+        discipline_id: discId,
+        teacher_id: tId,
+        group_id: gId,
         notes: (formData.get('notes') as string) || undefined,
         is_active: formData.get('is_active') === 'on',
-        discipline,
-        teacher,
-        group,
+        display_order: parseInt((formData.get('display_order') as string) || '0', 10),
+        discipline: disciplines.find((d) => d.id === discId) as Discipline,
+        teacher: teachers.find((t) => t.id === tId) as Teacher,
+        group: groups.find((g) => g.id === gId) as Group,
       };
 
-      const existingIndex = schedules.findIndex((s) => s.id === updatedId);
-      if (existingIndex >= 0) {
+      if (updatedId && schedules.some((s) => s.id === updatedId)) {
         setSchedules(schedules.map((s) => (s.id === updatedId ? newItem : s)));
       } else {
         setSchedules([...schedules, newItem]);
@@ -144,16 +142,25 @@ export default function AdminSchedulesPage() {
     setSaving(false);
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <Loader2 className="w-8 h-8 text-combat-red animate-spin" />
+        <p className="text-sm text-combat-slate-400">Cargando cronograma de horarios de la base de datos...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="font-display font-black text-2xl text-white uppercase tracking-tight">
-            Gestión de Horarios Semanales
+            Grilla y Horarios de Clases
           </h2>
           <p className="text-xs text-combat-slate-400 mt-1">
-            Configura las clases por día, horarios de inicio/fin, profesor y categoría.
+            Asigna días, horarios, disciplinas, profesores y grupos de entrenamiento.
           </p>
         </div>
         {!isCreating && !editingItem && (
@@ -162,7 +169,7 @@ export default function AdminSchedulesPage() {
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-combat-red hover:bg-combat-red-hover text-white text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-combat-red/20"
           >
             <Plus className="w-4 h-4" />
-            <span>Nuevo Horario</span>
+            <span>Nuevo Turno / Horario</span>
           </button>
         )}
       </div>
@@ -187,7 +194,7 @@ export default function AdminSchedulesPage() {
           <div className="flex items-center justify-between pb-4 border-b border-surface-border/60">
             <h3 className="font-display font-bold text-lg text-white uppercase flex items-center gap-2">
               <CalendarDays className="w-5 h-5 text-combat-red" />
-              <span>{editingItem ? 'Editar Turno / Horario' : 'Crear Nuevo Turno de Clase'}</span>
+              <span>{editingItem ? 'Editar Horario de Clase' : 'Crear Nuevo Turno en el Cronograma'}</span>
             </h3>
             <button
               onClick={handleCancel}
@@ -197,8 +204,8 @@ export default function AdminSchedulesPage() {
             </button>
           </div>
 
-          <form key={editingItem ? editingItem.id : 'new'} onSubmit={handleSubmit} className="space-y-5">
-            {editingItem && <input type="hidden" name="id" value={editingItem.id} />}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <input type="hidden" name="id" defaultValue={editingItem?.id || ''} />
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div>
@@ -207,12 +214,12 @@ export default function AdminSchedulesPage() {
                 </label>
                 <select
                   name="day_of_week"
-                  defaultValue={editingItem ? editingItem.day_of_week : selectedDay}
+                  defaultValue={editingItem?.day_of_week || selectedDay}
                   required
                   className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
                 >
                   {DAYS.map((d) => (
-                    <option key={d.id} value={d.id} className="bg-surface text-white">
+                    <option key={d.id} value={d.id}>
                       {d.name}
                     </option>
                   ))}
@@ -246,20 +253,21 @@ export default function AdminSchedulesPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
                   Disciplina
                 </label>
                 <select
                   name="discipline_id"
-                  defaultValue={editingItem?.discipline_id || (disciplines[0] ? disciplines[0].id : '')}
+                  defaultValue={editingItem?.discipline_id || ''}
                   required
                   className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
                 >
-                  {disciplines.map((disc) => (
-                    <option key={disc.id} value={disc.id} className="bg-surface text-white">
-                      {disc.name}
+                  <option value="" disabled>Selecciona una disciplina</option>
+                  {disciplines.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name}
                     </option>
                   ))}
                 </select>
@@ -271,13 +279,14 @@ export default function AdminSchedulesPage() {
                 </label>
                 <select
                   name="teacher_id"
-                  defaultValue={editingItem?.teacher_id || (teachers[0] ? teachers[0].id : '')}
+                  defaultValue={editingItem?.teacher_id || ''}
                   required
                   className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
                 >
+                  <option value="" disabled>Selecciona un profesor</option>
                   {teachers.map((t) => (
-                    <option key={t.id} value={t.id} className="bg-surface text-white">
-                      {t.name} {t.nickname ? `("${t.nickname}")` : ''} {t.is_world_champion ? '🏆' : ''}
+                    <option key={t.id} value={t.id}>
+                      {t.name} {t.is_world_champion ? '🏆' : ''}
                     </option>
                   ))}
                 </select>
@@ -289,12 +298,13 @@ export default function AdminSchedulesPage() {
                 </label>
                 <select
                   name="group_id"
-                  defaultValue={editingItem?.group_id || (groups[0] ? groups[0].id : '')}
+                  defaultValue={editingItem?.group_id || ''}
                   required
                   className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
                 >
+                  <option value="" disabled>Selecciona un grupo</option>
                   {groups.map((g) => (
-                    <option key={g.id} value={g.id} className="bg-surface text-white">
+                    <option key={g.id} value={g.id}>
                       {g.name} ({g.age_range})
                     </option>
                   ))}
@@ -304,13 +314,13 @@ export default function AdminSchedulesPage() {
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
-                Notas / Enfoque Especial (Opcional)
+                Notas / Subtítulo del Turno (Opcional)
               </label>
               <input
                 type="text"
                 name="notes"
                 defaultValue={editingItem?.notes || ''}
-                placeholder="Ej: Sparring condicionado, paos y clinch, técnica fundamental"
+                placeholder="Ej: Técnica fundamental y combinaciones, Paos y clinch, Sparring suave"
                 className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
               />
             </div>
@@ -318,13 +328,13 @@ export default function AdminSchedulesPage() {
             <div className="flex items-center gap-3 pt-2">
               <input
                 type="checkbox"
-                id="is_active_schedule"
+                id="schedule_is_active"
                 name="is_active"
                 defaultChecked={editingItem ? editingItem.is_active : true}
                 className="w-4 h-4 rounded text-combat-red focus:ring-combat-red"
               />
-              <label htmlFor="is_active_schedule" className="text-sm font-semibold text-white cursor-pointer">
-                Clase activa y visible en el cronograma semanal
+              <label htmlFor="schedule_is_active" className="text-sm font-semibold text-white cursor-pointer">
+                Clase activa en el cronograma semanal
               </label>
             </div>
 
@@ -349,68 +359,81 @@ export default function AdminSchedulesPage() {
         </div>
       )}
 
-      {/* Day Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        {DAYS.map((day) => (
+      {/* Day Selector Tabs */}
+      <div className="flex items-center overflow-x-auto pb-2 gap-2">
+        {DAYS.map((d) => (
           <button
-            key={day.id}
-            onClick={() => setSelectedDay(day.id)}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shrink-0 ${
-              selectedDay === day.id
-                ? 'bg-combat-red text-white shadow-md shadow-combat-red/20'
-                : 'bg-surface-card text-combat-slate-400 hover:text-white border border-surface-border'
+            key={d.id}
+            onClick={() => setSelectedDay(d.id)}
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
+              selectedDay === d.id
+                ? 'bg-combat-red text-white shadow-md shadow-combat-red/20 scale-105'
+                : 'bg-surface-card border border-surface-border text-combat-slate-400 hover:text-white hover:bg-surface-light'
             }`}
           >
-            {day.name}
+            {d.name}
           </button>
         ))}
       </div>
 
-      {/* Schedules Table */}
+      {/* Schedules Table for Selected Day */}
       <div className="rounded-2xl bg-surface-card border border-surface-border overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-combat-slate-300">
-            <thead className="bg-surface-light border-b border-surface-border text-xs font-bold uppercase tracking-wider text-combat-slate-400">
-              <tr>
-                <th className="px-6 py-4">Horario</th>
-                <th className="px-6 py-4">Disciplina</th>
-                <th className="px-6 py-4">Profesor</th>
-                <th className="px-6 py-4">Grupo / Nivel</th>
-                <th className="px-6 py-4">Notas</th>
-                <th className="px-6 py-4">Estado</th>
-                <th className="px-6 py-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-surface-border/60">
-              {currentDaySchedules.length > 0 ? (
-                currentDaySchedules.map((sch) => (
+        {currentDaySchedules.length === 0 ? (
+          <div className="text-center py-16 px-4">
+            <Clock className="w-12 h-12 text-combat-slate-500 mx-auto mb-3" />
+            <p className="text-base text-white font-bold">
+              No hay turnos registrados para el día {DAYS.find((d) => d.id === selectedDay)?.name}
+            </p>
+            <p className="text-xs text-combat-slate-400 mt-1">
+              Haz clic en "Nuevo Turno / Horario" para crear clases en este día.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-combat-slate-300">
+              <thead className="bg-surface-light border-b border-surface-border text-xs font-bold uppercase tracking-wider text-combat-slate-400">
+                <tr>
+                  <th className="px-6 py-4">Horario</th>
+                  <th className="px-6 py-4">Disciplina</th>
+                  <th className="px-6 py-4">Profesor</th>
+                  <th className="px-6 py-4">Grupo / Nivel</th>
+                  <th className="px-6 py-4">Notas</th>
+                  <th className="px-6 py-4">Estado</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-surface-border/60">
+                {currentDaySchedules.map((sch) => (
                   <tr key={sch.id} className="hover:bg-surface-light/40 transition-colors">
-                    <td className="px-6 py-4 font-bold text-white whitespace-nowrap">
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="w-4 h-4 text-combat-red" />
-                        <span>
-                          {sch.start_time} - {sch.end_time}
-                        </span>
+                    <td className="px-6 py-4">
+                      <div className="font-extrabold text-white text-sm bg-surface-light px-3 py-1 rounded-lg border border-surface-border inline-block font-mono">
+                        {sch.start_time} - {sch.end_time}
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-bold text-white">{sch.discipline?.name || 'Sin disciplina'}</td>
-                    <td className="px-6 py-4 text-combat-slate-200">
-                      {sch.teacher?.name || 'Sin profesor'} {sch.teacher?.is_world_champion ? '🏆' : ''}
+                    <td className="px-6 py-4 font-bold text-white">
+                      {sch.discipline?.name || 'Disciplina'}
                     </td>
-                    <td className="px-6 py-4 text-xs font-semibold text-combat-gold">
-                      {sch.group?.name || 'General'}
+                    <td className="px-6 py-4 text-combat-gold font-semibold">
+                      {sch.teacher?.name || 'Profesor'} {sch.teacher?.is_world_champion ? '🏆' : ''}
+                    </td>
+                    <td className="px-6 py-4 text-xs">
+                      <span className="bg-surface-light border border-surface-border px-2.5 py-1 rounded-md text-combat-slate-200">
+                        {sch.group?.name || 'General'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-xs text-combat-slate-400 italic">
                       {sch.notes || '-'}
                     </td>
                     <td className="px-6 py-4">
                       {sch.is_active ? (
-                        <span className="text-emerald-400 font-semibold text-xs flex items-center gap-1">
-                          <Eye className="w-3.5 h-3.5" /> Activo
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">
+                          <Eye className="w-3 h-3" />
+                          <span>Activo</span>
                         </span>
                       ) : (
-                        <span className="text-combat-slate-400 text-xs flex items-center gap-1">
-                          <EyeOff className="w-3.5 h-3.5" /> Oculto
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-combat-slate-700 text-combat-slate-400 text-xs font-semibold">
+                          <EyeOff className="w-3 h-3" />
+                          <span>Pausado</span>
                         </span>
                       )}
                     </td>
@@ -433,17 +456,11 @@ export default function AdminSchedulesPage() {
                       </div>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-combat-slate-400">
-                    No hay clases programadas para este día. Haz clic en "Nuevo Horario" para crear una.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

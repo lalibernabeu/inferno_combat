@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Trophy, Shield, Flame, Star, Award } from 'lucide-react';
+import { Trophy, Award, User } from 'lucide-react';
 import { TeacherWithDisciplines } from '@/lib/types';
 
 interface TeachersSectionProps {
@@ -10,6 +10,10 @@ interface TeachersSectionProps {
 }
 
 export const TeachersSection: React.FC<TeachersSectionProps> = ({ teachers }) => {
+  if (!teachers || teachers.length === 0) {
+    return null;
+  }
+
   return (
     <section id="profesores" className="py-20 relative bg-background border-t border-surface-border/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -40,13 +44,19 @@ export const TeachersSection: React.FC<TeachersSectionProps> = ({ teachers }) =>
               >
                 {/* Photo */}
                 <div className="relative h-64 w-full bg-surface-light overflow-hidden">
-                  <Image
-                    src={teacher.photo_url}
-                    alt={teacher.name}
-                    fill
-                    className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                  />
+                  {teacher.photo_url ? (
+                    <Image
+                      src={teacher.photo_url}
+                      alt={teacher.name}
+                      fill
+                      className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-surface-light text-combat-slate-500">
+                      <User className="w-16 h-16" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-surface-card via-transparent to-transparent opacity-90" />
 
                   {/* Champion Tag */}
@@ -69,9 +79,11 @@ export const TeachersSection: React.FC<TeachersSectionProps> = ({ teachers }) =>
                         "{teacher.nickname}"
                       </p>
                     )}
-                    <p className="text-xs text-combat-gold font-semibold mt-1">
-                      {teacher.experience_years}
-                    </p>
+                    {teacher.experience_years && (
+                      <p className="text-xs text-combat-gold font-semibold mt-1">
+                        {teacher.experience_years}
+                      </p>
+                    )}
 
                     <p className="text-xs text-combat-slate-300 leading-relaxed mt-3">
                       {teacher.bio}
@@ -79,21 +91,23 @@ export const TeachersSection: React.FC<TeachersSectionProps> = ({ teachers }) =>
                   </div>
 
                   {/* Disciplines Taught */}
-                  <div className="pt-3 border-t border-surface-border/60">
-                    <span className="text-[11px] font-semibold text-combat-slate-400 uppercase tracking-wider block mb-2">
-                      Disciplinas:
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {teacher.disciplines.map((disc) => (
-                        <span
-                          key={disc.id}
-                          className="px-2 py-0.5 rounded bg-surface-light text-[11px] font-medium text-combat-slate-200 border border-surface-border"
-                        >
-                          {disc.name}
-                        </span>
-                      ))}
+                  {teacher.disciplines && teacher.disciplines.length > 0 && (
+                    <div className="pt-3 border-t border-surface-border/60">
+                      <span className="text-[11px] font-semibold text-combat-slate-400 uppercase tracking-wider block mb-2">
+                        Disciplinas:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {teacher.disciplines.map((disc) => (
+                          <span
+                            key={disc.id}
+                            className="px-2 py-0.5 rounded bg-surface-light text-[11px] font-medium text-combat-slate-200 border border-surface-border"
+                          >
+                            {disc.name}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             );

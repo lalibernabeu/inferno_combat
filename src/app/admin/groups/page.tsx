@@ -1,29 +1,34 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Layers, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Eye, EyeOff, Save, X } from 'lucide-react';
+import { Layers, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Eye, EyeOff, Save, X, Loader2 } from 'lucide-react';
 import { Group } from '@/lib/types';
-import { mockGroups } from '@/lib/mock-data';
 import { saveGroup, deleteGroup } from '@/lib/actions/groups-actions';
 import { createClient } from '@/lib/supabase/client';
 
 export default function AdminGroupsPage() {
-  const [groups, setGroups] = useState<Group[]>(mockGroups);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [editingItem, setEditingItem] = useState<Group | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [status, setStatus] = useState<{ success?: string; error?: string } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadGroups() {
       try {
         const supabase = createClient();
-        const { data, error } = await supabase.from('groups').select('*').order('display_order', { ascending: true });
-        if (data && !error && data.length > 0) {
+        const { data, error } = await supabase
+          .from('groups')
+          .select('*')
+          .order('display_order', { ascending: true });
+        if (data && !error) {
           setGroups(data as Group[]);
         }
       } catch (e) {
         console.error('Error loading groups from Supabase:', e);
+      } finally {
+        setLoading(false);
       }
     }
     loadGroups();
@@ -53,7 +58,7 @@ export default function AdminGroupsPage() {
     if (res?.error) {
       setStatus({ error: res.error });
     } else {
-      setGroups(groups.filter((g) => g.id !== id));
+      setGroups((prev) => prev.filter((g) => g.id !== id));
       setStatus({ success: 'Grupo eliminado con éxito.' });
     }
   };
@@ -92,16 +97,25 @@ export default function AdminGroupsPage() {
     setSaving(false);
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <Loader2 className="w-8 h-8 text-combat-red animate-spin" />
+        <p className="text-sm text-combat-slate-400">Cargando grupos de la base de datos...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="font-display font-black text-2xl text-white uppercase tracking-tight">
-            Grupos y Niveles de Entrenamiento
+            Grupos por Edad y Nivel
           </h2>
           <p className="text-xs text-combat-slate-400 mt-1">
-            Administra las categorías de edades (Kids, Recreativo, Sparring y Competición).
+            Define las categorías de entrenamiento (Kids, Recreativo, Sparring, Competición).
           </p>
         </div>
         {!isCreating && !editingItem && (
@@ -135,7 +149,7 @@ export default function AdminGroupsPage() {
           <div className="flex items-center justify-between pb-4 border-b border-surface-border/60">
             <h3 className="font-display font-bold text-lg text-white uppercase flex items-center gap-2">
               <Layers className="w-5 h-5 text-combat-red" />
-              <span>{editingItem ? `Editar: ${editingItem.name}` : 'Crear Nueva Categoría / Grupo'}</span>
+              <span>{editingItem ? `Editar: ${editingItem.name}` : 'Crear Nuevo Grupo de Entrenamiento'}</span>
             </h3>
             <button
               onClick={handleCancel}
@@ -145,32 +159,32 @@ export default function AdminGroupsPage() {
             </button>
           </div>
 
-          <form key={editingItem ? editingItem.id : 'new'} onSubmit={handleSubmit} className="space-y-5">
-            {editingItem && <input type="hidden" name="id" value={editingItem.id} />}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <input type="hidden" name="id" defaultValue={editingItem?.id || ''} />
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
+                Nombre del Grupo / Nivel
+              </label>
+              <input
+                type="text"
+                name="name"
+                defaultValue={editingItem?.name || ''}
+                required
+                placeholder="Ej: Infantil / Kids o Jóvenes y Adultos"
+                className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
-                  Nombre del Grupo
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  defaultValue={editingItem?.name || ''}
-                  required
-                  placeholder="Ej: Infantil / Kids"
-                  className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
-                  Rango de Edades
+                  Rango de Edad
                 </label>
                 <input
                   type="text"
                   name="age_range"
-                  defaultValue={editingItem?.age_range || ''}
+                  defaultValue={editingItem?.age_range || '13 años en adelante'}
                   required
                   placeholder="Ej: 6 a 12 años"
                   className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
@@ -184,27 +198,13 @@ export default function AdminGroupsPage() {
                 <input
                   type="text"
                   name="level"
-                  defaultValue={editingItem?.level || 'Principiante e Intermedio'}
+                  defaultValue={editingItem?.level || 'Principiante a Intermedio'}
                   required
+                  placeholder="Ej: Inicial, Todos o Competición"
                   className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
-                Descripción y Enfoque Pedagógico
-              </label>
-              <textarea
-                name="description"
-                defaultValue={editingItem?.description || ''}
-                rows={3}
-                required
-                className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
                   Orden de Visualización
@@ -217,19 +217,33 @@ export default function AdminGroupsPage() {
                   className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
                 />
               </div>
+            </div>
 
-              <div className="flex items-center gap-3 pt-6">
-                <input
-                  type="checkbox"
-                  id="is_active_group"
-                  name="is_active"
-                  defaultChecked={editingItem ? editingItem.is_active : true}
-                  className="w-4 h-4 rounded text-combat-red focus:ring-combat-red"
-                />
-                <label htmlFor="is_active_group" className="text-sm font-semibold text-white cursor-pointer">
-                  Activo y visible en la sección de grupos
-                </label>
-              </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-combat-slate-300 mb-2">
+                Descripción del Enfoque Pedagógico
+              </label>
+              <textarea
+                name="description"
+                defaultValue={editingItem?.description || ''}
+                rows={3}
+                required
+                placeholder="Explica qué se enseña en este grupo y cuál es la intensidad de la clase..."
+                className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
+              />
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <input
+                type="checkbox"
+                id="group_is_active"
+                name="is_active"
+                defaultChecked={editingItem ? editingItem.is_active : true}
+                className="w-4 h-4 rounded text-combat-red focus:ring-combat-red"
+              />
+              <label htmlFor="group_is_active" className="text-sm font-semibold text-white cursor-pointer">
+                Visible en la página web pública
+              </label>
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-surface-border/60">
@@ -253,62 +267,80 @@ export default function AdminGroupsPage() {
         </div>
       )}
 
-      {/* Groups List Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {groups.map((group) => (
-          <div
-            key={group.id}
-            className="rounded-2xl bg-surface-card border border-surface-border p-6 flex flex-col justify-between space-y-4 shadow-xl"
-          >
-            <div>
-              <div className="flex items-center justify-between">
-                <h3 className="font-display font-bold text-lg text-white">
-                  {group.name}
-                </h3>
-                <span className="text-xs font-bold text-combat-gold bg-combat-gold/10 px-2.5 py-1 rounded-md border border-combat-gold/20">
-                  {group.level}
-                </span>
-              </div>
-              <div className="text-xs text-combat-slate-400 font-semibold mt-1">
-                🎂 Rango de edad: <span className="text-white">{group.age_range}</span>
-              </div>
-              <p className="text-xs text-combat-slate-300 leading-relaxed mt-3">
-                {group.description}
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between pt-3 border-t border-surface-border/50">
-              <span className="text-xs">
-                {group.is_active ? (
-                  <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                    <Eye className="w-3.5 h-3.5" /> Activo
-                  </span>
-                ) : (
-                  <span className="text-combat-slate-400 flex items-center gap-1">
-                    <EyeOff className="w-3.5 h-3.5" /> Oculto
-                  </span>
-                )}
-              </span>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleEdit(group)}
-                  className="p-2 rounded-lg bg-surface-light text-combat-slate-300 hover:text-white hover:bg-combat-red/20 transition-colors"
-                  title="Editar"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleDelete(group.id)}
-                  className="p-2 rounded-lg bg-surface-light text-combat-red hover:bg-combat-red/20 transition-colors"
-                  title="Eliminar"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+      {/* Groups Table */}
+      <div className="rounded-2xl bg-surface-card border border-surface-border overflow-hidden shadow-xl">
+        {groups.length === 0 ? (
+          <div className="text-center py-16 px-4">
+            <Layers className="w-12 h-12 text-combat-slate-500 mx-auto mb-3" />
+            <p className="text-base text-white font-bold">No hay grupos registrados en la base de datos</p>
+            <p className="text-xs text-combat-slate-400 mt-1">
+              Haz clic en "Nuevo Grupo" para crear las categorías de alumnos.
+            </p>
           </div>
-        ))}
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-combat-slate-300">
+              <thead className="bg-surface-light border-b border-surface-border text-xs font-bold uppercase tracking-wider text-combat-slate-400">
+                <tr>
+                  <th className="px-6 py-4">Grupo</th>
+                  <th className="px-6 py-4">Edad / Nivel</th>
+                  <th className="px-6 py-4">Descripción</th>
+                  <th className="px-6 py-4">Orden</th>
+                  <th className="px-6 py-4">Estado</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-surface-border/60">
+                {groups.map((g) => (
+                  <tr key={g.id} className="hover:bg-surface-light/40 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-white text-base">{g.name}</div>
+                    </td>
+                    <td className="px-6 py-4 text-xs space-y-1">
+                      <div>🎂 {g.age_range}</div>
+                      <div className="text-combat-gold font-semibold">⚡ {g.level}</div>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-combat-slate-300 max-w-sm">
+                      <p className="line-clamp-2">{g.description}</p>
+                    </td>
+                    <td className="px-6 py-4 font-bold text-white">{g.display_order}</td>
+                    <td className="px-6 py-4">
+                      {g.is_active ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">
+                          <Eye className="w-3 h-3" />
+                          <span>Activo</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-combat-slate-700 text-combat-slate-400 text-xs font-semibold">
+                          <EyeOff className="w-3 h-3" />
+                          <span>Oculto</span>
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEdit(g)}
+                          className="p-2 rounded-lg bg-surface-light text-combat-slate-300 hover:text-white hover:bg-combat-red/20 transition-colors"
+                          title="Editar"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(g.id)}
+                          className="p-2 rounded-lg bg-surface-light text-combat-red hover:bg-combat-red/20 transition-colors"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MessageCircle, Phone, Instagram, MapPin, HelpCircle, ChevronDown, ChevronUp, Send } from 'lucide-react';
+import { MessageCircle, Phone, Instagram, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { GymSettings } from '@/lib/types';
-import { getWhatsAppUrl } from '@/lib/mock-data';
+import { getWhatsAppUrl } from '@/lib/utils';
 
 interface ContactSectionProps {
   settings: GymSettings;
@@ -28,7 +28,7 @@ const FAQS = [
   {
     question: '¿El gimnasio cuenta con vestuarios?',
     answer:
-      'Sí, disponemos de amplios vestuarios masculinos y femeninos totalmente equipados.',
+      'Sí, disponemos de amplios vestuarios totalmente equipados.',
   },
 ];
 
@@ -39,7 +39,14 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ settings }) => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
-  const whatsAppUrl = getWhatsAppUrl();
+  const whatsAppUrl = getWhatsAppUrl(
+    settings.whatsapp_number,
+    settings.whatsapp_message
+  );
+
+  const instagramHandle = settings.instagram_url
+    ? settings.instagram_url.replace(/https?:\/\/(www\.)?instagram\.com\/?/, '@').replace(/\/$/, '')
+    : '@infernocombat';
 
   return (
     <section id="contacto" className="py-20 relative bg-surface">
@@ -89,32 +96,34 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ settings }) => {
             </a>
 
             {/* Instagram Card */}
-            <a
-              href={settings.instagram_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-6 rounded-2xl bg-surface-card border border-surface-border hover:border-pink-500/50 transition-all duration-300 flex items-center justify-between group shadow-lg"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-pink-500/15 text-pink-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Instagram className="w-6 h-6" />
+            {settings.instagram_url && (
+              <a
+                href={settings.instagram_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-6 rounded-2xl bg-surface-card border border-surface-border hover:border-pink-500/50 transition-all duration-300 flex items-center justify-between group shadow-lg"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-pink-500/15 text-pink-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Instagram className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-pink-400 uppercase tracking-wider">
+                      Redes Sociales
+                    </div>
+                    <div className="text-base font-bold text-white mt-0.5">
+                      {instagramHandle}
+                    </div>
+                    <div className="text-xs text-combat-slate-400">
+                      Fotos, videos y novedades diarias
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-pink-400 uppercase tracking-wider">
-                    Redes Sociales
-                  </div>
-                  <div className="text-base font-bold text-white mt-0.5">
-                    @inferno_combat
-                  </div>
-                  <div className="text-xs text-combat-slate-400">
-                    Fotos, videos y novedades diarias
-                  </div>
-                </div>
-              </div>
-              <span className="text-xs font-bold text-pink-400 bg-pink-500/10 px-3 py-1.5 rounded-lg border border-pink-500/30">
-                Seguir
-              </span>
-            </a>
+                <span className="text-xs font-bold text-pink-400 bg-pink-500/10 px-3 py-1.5 rounded-lg border border-pink-500/30">
+                  Seguir
+                </span>
+              </a>
+            )}
 
             {/* Direct Call Card */}
             <a

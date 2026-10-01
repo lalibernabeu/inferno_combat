@@ -2,9 +2,9 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Trophy, Award, Star, MessageCircle, ShieldCheck, Flame } from 'lucide-react';
+import { Trophy, Award, MessageCircle, ShieldCheck, Flame } from 'lucide-react';
 import { TeacherWithDisciplines } from '@/lib/types';
-import { getWhatsAppUrl } from '@/lib/mock-data';
+import { getWhatsAppUrl } from '@/lib/utils';
 
 interface ChampionBannerProps {
   champion?: TeacherWithDisciplines;
@@ -14,7 +14,8 @@ export const ChampionBanner: React.FC<ChampionBannerProps> = ({ champion }) => {
   if (!champion) return null;
 
   const whatsAppUrl = getWhatsAppUrl(
-    `¡Hola! Me gustaría consultar por los entrenamientos y clases dictadas por el profesor Esteban Diaz.`
+    '5492617078248',
+    `¡Hola! Me gustaría consultar por los entrenamientos y clases dictadas por el profesor ${champion.name}.`
   );
 
   return (
@@ -36,13 +37,19 @@ export const ChampionBanner: React.FC<ChampionBannerProps> = ({ champion }) => {
               <div className="relative group">
                 <div className="absolute -inset-1.5 bg-gradient-to-r from-combat-gold via-amber-500 to-combat-red rounded-2xl blur-md opacity-70 group-hover:opacity-100 transition duration-500" />
                 <div className="relative w-72 h-96 sm:w-80 sm:h-[440px] rounded-2xl overflow-hidden bg-surface-light border border-combat-gold/50 shadow-2xl">
-                  <Image
-                    src={champion.photo_url}
-                    alt={champion.name}
-                    fill
-                    className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 768px) 100vw, 400px"
-                  />
+                  {champion.photo_url ? (
+                    <Image
+                      src={champion.photo_url}
+                      alt={champion.name}
+                      fill
+                      className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 768px) 100vw, 400px"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-surface-light text-combat-gold">
+                      <Trophy className="w-16 h-16" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-80" />
 
                   {/* Floating badge over photo */}
@@ -52,10 +59,10 @@ export const ChampionBanner: React.FC<ChampionBannerProps> = ({ champion }) => {
                     </div>
                     <div>
                       <div className="text-[11px] font-bold text-combat-gold uppercase tracking-wider">
-                        Título Mundial
+                        Dirección Técnica
                       </div>
                       <div className="text-xs text-white font-semibold line-clamp-1">
-                        75kg
+                        {champion.champion_title_details || 'Campeón Internacional'}
                       </div>
                     </div>
                   </div>
@@ -91,7 +98,7 @@ export const ChampionBanner: React.FC<ChampionBannerProps> = ({ champion }) => {
                     <Trophy className="w-6 h-6 text-combat-gold shrink-0 mt-0.5" />
                     <div>
                       <div className="text-sm font-bold text-white uppercase tracking-wide">
-                        TÍTULOS
+                        TÍTULOS Y LOGROS
                       </div>
                       <p className="text-sm text-combat-slate-200 mt-0.5 font-medium">
                         {champion.champion_title_details}
@@ -108,12 +115,14 @@ export const ChampionBanner: React.FC<ChampionBannerProps> = ({ champion }) => {
 
               {/* Experience and Disciplines pills */}
               <div className="flex flex-wrap gap-2 pt-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-light border border-surface-border text-xs font-semibold text-white">
-                  <ShieldCheck className="w-3.5 h-3.5 text-combat-gold" />
-                  {champion.experience_years}
-                </span>
+                {champion.experience_years && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-light border border-surface-border text-xs font-semibold text-white">
+                    <ShieldCheck className="w-3.5 h-3.5 text-combat-gold" />
+                    {champion.experience_years}
+                  </span>
+                )}
 
-                {champion.disciplines.map((disc) => (
+                {champion.disciplines?.map((disc) => (
                   <span
                     key={disc.id}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-light border border-surface-border text-xs font-semibold text-combat-slate-300"
@@ -140,7 +149,7 @@ export const ChampionBanner: React.FC<ChampionBannerProps> = ({ champion }) => {
                   href="#horarios"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-surface-light hover:bg-surface-hover text-white text-sm font-semibold border border-surface-border transition-colors"
                 >
-                  <span>Ver Horarios de Esteban</span>
+                  <span>Ver Horarios de Clases</span>
                 </a>
               </div>
             </div>

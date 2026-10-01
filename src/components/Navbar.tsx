@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Shield, Menu, X, MessageCircle } from 'lucide-react';
+import { Menu, X, MessageCircle } from 'lucide-react';
 import { BullLogo } from './BullLogo';
 import { GymSettings } from '@/lib/types';
-import { getWhatsAppUrl } from '@/lib/mock-data';
+import { getWhatsAppUrl } from '@/lib/utils';
 
 interface NavbarProps {
   settings: GymSettings;
@@ -35,10 +35,13 @@ export const Navbar: React.FC<NavbarProps> = ({ settings }) => {
     { label: 'Nosotros', href: '/#nosotros' },
     { label: 'Profesores', href: '/#profesores' },
     { label: 'Ubicación', href: '/#ubicacion' },
-    { label: 'Tienda', href: '/tienda', isBadge: true },
+    { label: 'Contacto', href: '/#contacto' },
   ];
 
-  const whatsAppUrl = getWhatsAppUrl();
+  const whatsAppUrl = getWhatsAppUrl(
+    settings.whatsapp_number,
+    settings.whatsapp_message
+  );
 
   return (
     <header
@@ -71,18 +74,9 @@ export const Navbar: React.FC<NavbarProps> = ({ settings }) => {
               <Link
                 key={link.label}
                 href={link.href}
-                className={`text-sm font-medium transition-colors relative py-1 flex items-center gap-1.5 ${
-                  link.isBadge
-                    ? 'text-amber-400 hover:text-amber-300 font-semibold'
-                    : 'text-combat-slate-300 hover:text-white after:content-[\'\'] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-combat-red hover:after:w-full after:transition-all after:duration-300'
-                }`}
+                className="text-sm font-medium transition-colors relative py-1 text-combat-slate-300 hover:text-white after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-combat-red hover:after:w-full after:transition-all after:duration-300"
               >
                 <span>{link.label}</span>
-                {link.isBadge && (
-                  <span className="text-[9px] font-bold px-1.5 py-0.2 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded uppercase tracking-wider">
-                    Nuevo
-                  </span>
-                )}
               </Link>
             ))}
           </nav>
@@ -123,11 +117,6 @@ export const Navbar: React.FC<NavbarProps> = ({ settings }) => {
                 className="px-4 py-3 rounded-lg text-base font-medium text-combat-slate-200 hover:text-white hover:bg-surface-hover transition-colors flex items-center justify-between"
               >
                 <span>{link.label}</span>
-                {link.isBadge && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded uppercase">
-                    Próximamente
-                  </span>
-                )}
               </Link>
             ))}
           </div>

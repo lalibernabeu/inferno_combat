@@ -24,23 +24,23 @@ insert into public.gym_settings (
   seo_description
 ) values (
   '00000000-0000-0000-0000-000000000001',
-  'APEX COMBAT CLUB',
+  'INFERNO COMBAT',
   'Forja tu carácter. Domina el combate.',
-  'Centro de alto rendimiento en deportes de combate y artes marciales. Entrenamiento integral para todos los niveles: desde recreativo y defensa personal hasta competición profesional.',
-  'En APEX COMBAT CLUB combinamos la disciplina tradicional de las artes marciales con la metodología más avanzada de preparación física de combate. Nuestro gimnasio está equipado con ring reglamentario, jaula de MMA, tatami olímpico de alta absorción de impacto y zona de sacos pesados. Contamos con un cuerpo docente de atletas de élite liderado por un Campeón Mundial, asegurando una enseñanza técnica, segura y basada en valores de respeto, constancia y superación personal.',
-  'Av. Corrientes 4520, Almagro',
-  'Ciudad Autónoma de Buenos Aires',
-  '+54 9 11 5555-8899',
-  '5491155558899',
-  '¡Hola! Quisiera consultar por las clases de combate y reservar una clase de prueba gratuita.',
-  'https://instagram.com/apexcombatclub',
-  'https://facebook.com/apexcombatclub',
-  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3283.9926685002597!2d-58.428751523471015!3d-34.60434865753177!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bcca62d4715555%3A0x6739956488730b65!2sAv.%20Corrientes%204520%2C%20C1195AAS%20Cdad.%20Aut%C3%B3noma%20de%20Buenos%20Aires!5e0!3m2!1ses!2sar!4v1700000000000!5m2!1ses!2sar',
-  'https://maps.google.com/?q=Av.+Corrientes+4520,+Buenos+Aires',
+  'Centro de alto rendimiento en deportes de combate y artes marciales. Entrenamiento integral para todos los niveles: desde recreativo y defensa personal hasta competición.',
+  'En INFERNO COMBAT combinamos la disciplina del entrenamiento de combate con la metodología más avanzada de preparación física. Nuestro gimnasio está equipado con tatami antibacteriano de alta absorción de impacto y zona de sacos de impacto y peso libre. Asegurando una enseñanza técnica, segura y basada en valores de respeto, constancia y superación personal.',
+  'Av. San Martín 1234',
+  'Mendoza',
+  '+54 9 261 707-8248',
+  '5492617078248',
+  '¡Hola! Quisiera consultar por las clases de combate en INFERNO COMBAT.',
+  'https://instagram.com/infernocombat',
+  'https://facebook.com/infernocombat',
+  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3350.2!2d-68.8!3d-32.8!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzLCsDQ4JzAwLjAiUyA2OMKwNDgnMDAuMCJX!5e0!3m2!1ses!2sar!4v1700000000000!5m2!1ses!2sar',
+  'https://maps.google.com/?q=Mendoza,+Argentina',
   '/images/logo.png',
   'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&w=2000&q=80',
-  'APEX Combat Club | Kickboxing, Boxeo, BJJ, Muay Thai y MMA',
-  'Gimnasio de deportes de combate en Buenos Aires. Clases de Kickboxing, Boxeo, BJJ, Muay Thai y MMA con profesores de élite y Campeón Mundial.'
+  'INFERNO COMBAT | Kickboxing, Boxeo, K1 y Muay Thai',
+  'Gimnasio de deportes de combate en Mendoza. Clases de Kickboxing, Boxeo, K1 y Muay Thai con profesores experimentados.'
 ) on conflict (id) do update set name = excluded.name;
 
 -- 2. PROFESORES

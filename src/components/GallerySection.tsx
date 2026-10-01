@@ -12,6 +12,10 @@ interface GallerySectionProps {
 export const GallerySection: React.FC<GallerySectionProps> = ({ gallery }) => {
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
 
+  if (!gallery || gallery.length === 0) {
+    return null;
+  }
+
   const openLightbox = (index: number) => {
     setActiveImageIndex(index);
   };

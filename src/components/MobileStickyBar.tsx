@@ -1,16 +1,19 @@
 'use client';
 
 import React from 'react';
-import { MessageCircle, MapPin, Calendar } from 'lucide-react';
+import { MessageCircle, MapPin } from 'lucide-react';
 import { GymSettings } from '@/lib/types';
-import { getWhatsAppUrl } from '@/lib/mock-data';
+import { getWhatsAppUrl } from '@/lib/utils';
 
 interface MobileStickyBarProps {
   settings: GymSettings;
 }
 
 export const MobileStickyBar: React.FC<MobileStickyBarProps> = ({ settings }) => {
-  const whatsAppUrl = getWhatsAppUrl();
+  const whatsAppUrl = getWhatsAppUrl(
+    settings.whatsapp_number,
+    settings.whatsapp_message
+  );
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-surface/95 backdrop-blur-lg border-t border-surface-border p-3 px-4 shadow-[0_-10px_25px_rgba(0,0,0,0.6)]">
