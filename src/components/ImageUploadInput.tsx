@@ -189,13 +189,13 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
       {mode === 'url' && (
         <div>
           <input
-            type="url"
+            type="text"
             value={url}
             onChange={(e) => {
               setUrl(e.target.value);
               setUploadError(null);
             }}
-            placeholder="https://images.unsplash.com/... o https://..."
+            placeholder="/images/profesores/foto.jpg o https://..."
             className="w-full px-4 py-3 rounded-xl bg-surface-light border border-surface-border text-white text-sm focus:outline-none focus:border-combat-red"
           />
         </div>

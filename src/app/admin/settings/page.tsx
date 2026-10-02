@@ -23,7 +23,7 @@ const defaultSettings: GymSettings = {
   google_maps_embed_url: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3350.2!2d-68.8!3d-32.8!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzLCsDQ4JzAwLjAiUyA2OMKwNDgnMDAuMCJX!5e0!3m2!1ses!2sar!4v1700000000000!5m2!1ses!2sar',
   google_maps_link: 'https://maps.google.com/?q=Mendoza,+Argentina',
   logo_url: '/images/logo.png',
-  hero_bg_url: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&w=2000&q=80',
+  hero_bg_url: '/images/hero/hero.jpg',
   seo_title: 'INFERNO COMBAT | Kickboxing, Boxeo, K1 y Muay Thai',
   seo_description: 'Gimnasio de deportes de combate en Mendoza. Clases de Kickboxing, Boxeo, K1 y Muay Thai con profesores experimentados.',
 };

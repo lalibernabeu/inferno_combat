@@ -38,7 +38,7 @@ insert into public.gym_settings (
   'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3350.2!2d-68.8!3d-32.8!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzLCsDQ4JzAwLjAiUyA2OMKwNDgnMDAuMCJX!5e0!3m2!1ses!2sar!4v1700000000000!5m2!1ses!2sar',
   'https://maps.google.com/?q=Mendoza,+Argentina',
   '/images/logo.png',
-  'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&w=2000&q=80',
+  '/images/hero/hero.jpg',
   'INFERNO COMBAT | Kickboxing, Boxeo, K1 y Muay Thai',
   'Gimnasio de deportes de combate en Mendoza. Clases de Kickboxing, Boxeo, K1 y Muay Thai con profesores experimentados.'
 ) on conflict (id) do update set name = excluded.name;
